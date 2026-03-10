@@ -21,7 +21,7 @@ $PLUGIN_DIR = Split-Path -Parent $SCRIPT_DIR
 $MAIN_FILE = Join-Path $PLUGIN_DIR "internal-links.php"
 $OWNER = "leluongnghia"
 $REPO = "internal-link"
-$PLUGIN_SLUG = "internal-links"
+$PLUGIN_SLUG = "ai-internal-linker"
 
 Write-Host ""
 Write-Host "============================================" -ForegroundColor Blue
