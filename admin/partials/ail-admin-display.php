@@ -298,7 +298,7 @@
                         <td>
                             <input type="url" name="ail_github_updater_url" class="ail-input"
                                 value="<?php echo esc_attr(get_option('ail_github_updater_url')); ?>"
-                                placeholder="https://github.com/AzEvent/plugin-internal-links" />
+                                placeholder="https://github.com/leluongnghia/internal-link" />
                             <span class="ail-help-text">Full URL to GitHub repo for automatic updates.</span>
                         </td>
                     </tr>
@@ -308,19 +308,60 @@
                             <input type="password" name="ail_github_updater_token" class="ail-input"
                                 value="<?php echo esc_attr(get_option('ail_github_updater_token')); ?>"
                                 placeholder="ghp_..." />
-                            <span class="ail-help-text">Required if repository is Private or to bypass rate
-                                Limits.</span>
+                            <span class="ail-help-text">Required if repository is Private or to bypass rate limits.</span>
                         </td>
                     </tr>
                 </table>
-                <hr style="border:0; border-top:1px dashed var(--ail-border); margin:20px 0;">
-                <div style="display:flex; align-items:center; gap:16px;">
-                    <button type="button" id="ail-force-update-btn" class="ail-btn ail-btn-secondary">
-                        <span class="dashicons dashicons-update" style="margin-top:4px;"></span> Check for Updates Now
-                    </button>
-                    <span id="ail-update-spinner" class="spinner" style="float:none; margin:0;"></span>
-                </div>
-                <div id="ail-update-result" style="margin-top:16px;"></div>
+            </div>
+
+            <div class="ail-card">
+                <h2 class="ail-card-header">Current Status</h2>
+                <table class="form-table">
+                    <tr>
+                        <th scope="row">Current Version</th>
+                        <td><strong><?php echo esc_html(AIL_VERSION); ?></strong></td>
+                    </tr>
+                    <tr>
+                        <th scope="row">Repository URL</th>
+                        <td>
+                            <?php
+                            $ail_repo_url = get_option('ail_github_updater_url', '');
+                            if ($ail_repo_url) {
+                                echo '<a href="' . esc_url($ail_repo_url) . '" target="_blank">' . esc_html($ail_repo_url) . '</a>';
+                            } else {
+                                echo '<em>Chưa cấu hình</em>';
+                            }
+                            ?>
+                        </td>
+                    </tr>
+                    <tr>
+                        <th scope="row">GitHub Token</th>
+                        <td>
+                            <?php
+                            $ail_token = get_option('ail_github_updater_token', '');
+                            if (!empty($ail_token)) {
+                                echo '<span style="color:var(--ail-success);">&#x2705; Đã cấu hình (' . esc_html(substr($ail_token, 0, 8)) . '...)</span>';
+                            } else {
+                                echo '<span>&#x274C; Chưa có token (chỉ cần nếu repo private)</span>';
+                            }
+                            ?>
+                        </td>
+                    </tr>
+                    <tr>
+                        <th scope="row">Force Check Update</th>
+                        <td>
+                            <button type="button" id="ail-force-update-btn" class="ail-btn ail-btn-secondary">
+                                <span class="dashicons dashicons-update" style="margin-top:3px;"></span>
+                                &#x1F504; Kiểm tra ngay (Clear Cache)
+                            </button>
+                            <span id="ail-check-spinner" style="display:none; margin-left:10px;">
+                                <span class="spinner is-active" style="float:none; vertical-align:middle;"></span>
+                                Đang kiểm tra GitHub...
+                            </span>
+                            <div id="ail-update-result" style="margin-top:12px;"></div>
+                        </td>
+                    </tr>
+                </table>
             </div>
         </div>
 
@@ -331,48 +372,54 @@
     </form>
 </div>
 
-<script>
-    jQuery(document).ready(function ($) {
-        $('#ail-force-update-btn').on('click', function () {
-            var btn = $(this);
-            var spinner = $('#ail-update-spinner');
-            var result = $('#ail-update-result');
+<script type="text/javascript">
+document.getElementById('ail-force-update-btn').addEventListener('click', function () {
+    var btn     = this;
+    var spinner = document.getElementById('ail-check-spinner');
+    var result  = document.getElementById('ail-update-result');
 
-            btn.prop('disabled', true);
-            spinner.addClass('is-active');
-            result.html('');
+    btn.disabled          = true;
+    spinner.style.display = 'inline-block';
+    result.innerHTML      = '';
 
-            $.ajax({
-                url: ajaxurl,
-                type: 'POST',
-                data: {
-                    action: 'ail_force_update_check',
-                    nonce: '<?php echo wp_create_nonce("ail_force_update"); ?>'
-                },
-                success: function (response) {
-                    spinner.removeClass('is-active');
-                    btn.prop('disabled', false);
+    var data = new FormData();
+    data.append('action', 'ail_force_update_check');
+    data.append('nonce',  '<?php echo wp_create_nonce('ail_force_update'); ?>');
 
-                    if (response.success) {
-                        var color = response.data.has_update ? '#d63638' : '#00a32a';
-                        var html = '<div style="padding:16px; background:var(--ail-bg-canvas); border:1px solid var(--ail-border); border-left:4px solid ' + color + '; border-radius:6px;">';
-                        html += '<strong style="display:block; margin-bottom:8px;">' + response.data.message + '</strong>';
-                        if (response.data.has_update) {
-                            html += 'Current Version: <code>' + response.data.current_version + '</code> → Latest: <code>' + response.data.latest_version + '</code><br>';
-                            html += '<a href="<?php echo admin_url('plugins.php'); ?>" class="ail-btn ail-btn-primary" style="margin-top:12px;">Go to Plugins to Update</a>';
-                        }
-                        html += '</div>';
-                        result.html(html);
-                    } else {
-                        result.html('<div style="color:var(--ail-danger);">' + (response.data || 'Failed to check') + '</div>');
-                    }
-                },
-                error: function () {
-                    spinner.removeClass('is-active');
-                    btn.prop('disabled', false);
-                    result.html('<div style="color:var(--ail-danger);">Connection error.</div>');
-                }
-            });
-        });
+    fetch('<?php echo admin_url('admin-ajax.php'); ?>', {
+        method: 'POST',
+        body: data,
+        credentials: 'same-origin'
+    })
+    .then(function (r) { return r.json(); })
+    .then(function (resp) {
+        spinner.style.display = 'none';
+        btn.disabled          = false;
+
+        if (resp.success) {
+            var d     = resp.data;
+            var color = d.has_update ? '#d63638' : '#00a32a';
+            var html  = '<div style="padding:14px; background:var(--ail-bg-canvas); border:1px solid var(--ail-border); border-left:4px solid ' + color + '; border-radius:6px;">';
+            html += '<strong style="display:block; margin-bottom:8px; font-size:14px;">' + d.message + '</strong>';
+            html += 'Version hiện tại: <code>' + d.current_version + '</code> &nbsp;|&nbsp; ';
+            html += 'Version GitHub: <code>' + d.latest_version + '</code><br>';
+            html += 'Phát hành lúc: ' + d.published_at + '<br>';
+            if (d.has_update) {
+                html += '<a href="<?php echo admin_url('plugins.php'); ?>" class="ail-btn ail-btn-primary" style="margin-top:10px;">&#x2192; Vào Plugins để Update</a>';
+            }
+            html += '</div>';
+            result.innerHTML = html;
+        } else {
+            var msg = (resp.data && resp.data.message) ? resp.data.message : (resp.data || 'Lỗi không xác định');
+            result.innerHTML = '<div style="padding:12px; background:var(--ail-bg-canvas); border:1px solid var(--ail-border); border-left:4px solid var(--ail-danger); border-radius:6px;">'
+                + msg + '<br>Token status: ' + ((resp.data && resp.data.token_set) ? resp.data.token_set : 'N/A')
+                + '</div>';
+        }
+    })
+    .catch(function (err) {
+        spinner.style.display = 'none';
+        btn.disabled          = false;
+        result.innerHTML = '<div style="color:var(--ail-danger);">Lỗi kết nối: ' + err + '</div>';
     });
+});
 </script>
