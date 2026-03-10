@@ -87,7 +87,7 @@ class AIL_Sweeper
             return; // Wait for next index run
         }
 
-        $batch_size = (int) get_option('ail_batch_size', 5);
+        $batch_size = max(1, (int) get_option('ail_batch_size', 5));
         $batch_posts = array_slice($queue, $pointer, $batch_size);
 
         if (empty($batch_posts)) {
@@ -102,15 +102,37 @@ class AIL_Sweeper
 
         $processed_count = 0;
 
+        // Parse memory limit
+        $mem_limit_str = ini_get('memory_limit');
+        $mem_limit = 134217728; // Default 128MB
+        if ($mem_limit_str === '-1') {
+            $mem_limit = -1; // No limit
+        } elseif (preg_match('/^(\d+)([a-zA-Z]*)$/', trim($mem_limit_str), $matches)) {
+            $val = (int) $matches[1];
+            $unit = strtolower($matches[2]);
+            if ($unit === 'g')
+                $mem_limit = $val * 1024 * 1024 * 1024;
+            elseif ($unit === 'm')
+                $mem_limit = $val * 1024 * 1024;
+            elseif ($unit === 'k')
+                $mem_limit = $val * 1024;
+            else
+                $mem_limit = $val;
+        }
+
         foreach ($batch_posts as $post_id) {
             // Time guard
             if ((time() - $start_time) > $max_execution_time) {
+                if ($processed_count === 0)
+                    $processed_count = 1; // Prevent infinite loop
                 error_log("AI Internal Linker: Batch process hit time limit ($max_execution_time s).");
                 break;
             }
 
             // Memory guard
-            if (memory_get_usage() > (ini_get('memory_limit') ? intval(ini_get('memory_limit')) * 1024 * 1024 * 0.8 : 134217728)) { // 128MB * 0.8 safety defaults
+            if ($mem_limit !== -1 && memory_get_usage() > ($mem_limit * 0.8)) {
+                if ($processed_count === 0)
+                    $processed_count = 1; // Prevent infinite loop
                 error_log("AI Internal Linker: Batch process hit memory guard.");
                 break;
             }
