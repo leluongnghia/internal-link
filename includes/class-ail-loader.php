@@ -90,11 +90,15 @@ class AIL_Loader
 
 		$this->add_action('admin_menu', $plugin_admin, 'add_plugin_admin_menu');
 		$this->add_action('admin_enqueue_scripts', $plugin_admin, 'enqueue_styles');
+		$this->add_action('admin_enqueue_scripts', $plugin_admin, 'enqueue_scripts');
 		$this->add_action('admin_init', $plugin_admin, 'register_settings');
 
 		// Manual Run Hooks
 		$this->add_filter('post_row_actions', $plugin_admin, 'add_manual_run_action', 10, 2);
 		$this->add_action('wp_ajax_ail_manual_run', $plugin_admin, 'ajax_handle_manual_run');
+
+		// Force Batch Process Hook
+		$this->add_action('wp_ajax_ail_force_batch_process', $plugin_admin, 'ajax_force_batch_process');
 	}
 
 	/**
