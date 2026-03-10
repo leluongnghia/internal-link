@@ -1,0 +1,21 @@
+# Plugin AI Internal Linker - Danh Sách Công Việc
+
+- [x] Thiết Lập Dự Án <!-- id: 0 -->
+    - [x] Tạo cấu trúc plugin (thư mục, file chính) trong `Plugin az/Internal-Links` <!-- id: 15 -->
+    - [x] Định nghĩa `AIL_Loader` và `AIL_Activator` <!-- id: 16 -->
+- [ ] Giao Diện Admin & Cấu Hình <!-- id: 17 -->
+    - [ ] **Refactor**: Cập nhật trang cài đặt (Multi-Provider Keys, Dynamic Models) <!-- id: 31 -->
+    - [ ] **Refactor**: Cập nhật Optimization Skill (Multi-select / Select All) <!-- id: 32 -->
+    - [ ] Javascript cho Admin (Show/Hide logic) <!-- id: 33 -->
+- [ ] Logic Cốt Lõi (Bộ Não) <!-- id: 20 -->
+    - [x] Triển khai `AIL_Content_Retriever` (Lấy bài viết ứng viên theo category/tag) <!-- id: 21 -->
+    - [x] **Update**: `AIL_Injector` hỗ trợ nhiều key/model riêng biệt <!-- id: 34 -->
+    - [x] **Feature**: Hệ thống Log (Ghi lại lịch sử chèn link) <!-- id: 35 -->
+    - [x] **Feature**: Nút "Run AI Linker" thủ công trên danh sách bài viết <!-- id: 40 -->
+- [ ] Báo Cáo & Thống Kê <!-- id: 36 -->
+    - [ ] Tạo bảng Log trong Database (`activator`) <!-- id: 37 -->
+    - [ ] Thêm trang submenu "Reports" <!-- id: 38 -->
+    - [ ] Hiển thị bảng báo cáo (Post, AI Model, Thời gian) <!-- id: 39 -->
+- [x] Tích Hợp & Kiểm Thử <!-- id: 24 -->
+    - [x] Tạo hàm API đơn giản `ail_inject_links($content)` để sử dụng bên ngoài <!-- id: 25 -->
+    - [x] Sửa menu admin bị mất <!-- id: 30 -->
