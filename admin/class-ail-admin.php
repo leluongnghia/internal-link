@@ -286,4 +286,90 @@ class AIL_Admin
         ));
     }
 
+    /**
+     * AJAX handler to force-check GitHub for a new plugin version.
+     * Clears cached transients so it always hits the GitHub API fresh.
+     */
+    public function ajax_force_update_check()
+    {
+        if (!current_user_can('manage_options') || !check_ajax_referer('ail_force_update', 'nonce', false)) {
+            wp_send_json_error('Permission denied.');
+        }
+
+        // ── 1. Read config ────────────────────────────────────────
+        $github_url = get_option('ail_github_updater_url', '');
+        $token = get_option('ail_github_updater_token', '');
+
+        if (empty($github_url)) {
+            wp_send_json_error('GitHub Repository URL is not configured in plugin settings.');
+        }
+
+        // Parse owner/repo from URL  e.g. https://github.com/leluongnghia/internal-link
+        $parts = array_filter(explode('/', rtrim(parse_url($github_url, PHP_URL_PATH), '/')));
+        $parts = array_values($parts);
+        $username = $parts[0] ?? '';
+        $repo = $parts[1] ?? '';
+
+        if (empty($username) || empty($repo)) {
+            wp_send_json_error('Invalid GitHub URL format. Expected: https://github.com/owner/repo');
+        }
+
+        // ── 2. Clear caches ───────────────────────────────────────
+        delete_site_transient('update_plugins');
+        $transient_key = 'ail_github_latest_release_' . md5($username . $repo);
+        delete_transient($transient_key);
+
+        // ── 3. Fetch latest release from GitHub API ───────────────
+        $api_url = "https://api.github.com/repos/{$username}/{$repo}/releases/latest";
+        $args = array(
+            'timeout' => 20,
+            'headers' => array(
+                'Accept' => 'application/vnd.github.v3+json',
+                'User-Agent' => 'WordPress/AIL-Plugin',
+            ),
+        );
+
+        if (!empty($token)) {
+            $args['headers']['Authorization'] = 'token ' . $token;
+        }
+
+        $response = wp_remote_get($api_url, $args);
+
+        if (is_wp_error($response)) {
+            wp_send_json_error('GitHub API error: ' . $response->get_error_message());
+        }
+
+        if (wp_remote_retrieve_response_code($response) !== 200) {
+            wp_send_json_error('GitHub returned HTTP ' . wp_remote_retrieve_response_code($response) . '. Check the repo URL and token.');
+        }
+
+        $release = json_decode(wp_remote_retrieve_body($response));
+
+        if (empty($release->tag_name)) {
+            wp_send_json_error('No releases found on GitHub for this repository.');
+        }
+
+        // Cache for 12 hours
+        set_transient($transient_key, $release, 12 * HOUR_IN_SECONDS);
+
+        // ── 4. Compare with installed version ─────────────────────
+        $current_version = AIL_VERSION;
+        $latest_version = ltrim($release->tag_name, 'v');
+        $has_update = version_compare($current_version, $latest_version, '<');
+
+        // Force WordPress to refresh update transient
+        wp_update_plugins();
+
+        wp_send_json_success(array(
+            'current_version' => $current_version,
+            'latest_version' => $latest_version,
+            'has_update' => $has_update,
+            'release_url' => $release->html_url,
+            'published_at' => $release->published_at,
+            'message' => $has_update
+                ? "🎉 New update available: v{$latest_version}! Go to Plugins → Update now."
+                : "✅ Plugin is up to date (v{$current_version})",
+        ));
+    }
+
 }

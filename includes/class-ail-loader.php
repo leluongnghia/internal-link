@@ -99,6 +99,9 @@ class AIL_Loader
 
 		// Force Batch Process Hook
 		$this->add_action('wp_ajax_ail_force_batch_process', $plugin_admin, 'ajax_force_batch_process');
+
+		// Force GitHub Update Check
+		$this->add_action('wp_ajax_ail_force_update_check', $plugin_admin, 'ajax_force_update_check');
 	}
 
 	/**

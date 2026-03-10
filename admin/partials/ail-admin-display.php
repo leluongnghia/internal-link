@@ -319,6 +319,14 @@
                         </td>
                     </tr>
                 </table>
+                <hr style="border:0; border-top:1px dashed var(--ail-border); margin:20px 0;">
+                <div style="display:flex; align-items:center; gap:16px;">
+                    <button type="button" id="ail-force-update-btn" class="ail-btn ail-btn-secondary">
+                        <span class="dashicons dashicons-update" style="margin-top:4px;"></span> Check for Updates Now
+                    </button>
+                    <span id="ail-update-spinner" class="spinner" style="float:none; margin:0;"></span>
+                </div>
+                <div id="ail-update-result" style="margin-top:16px;"></div>
             </div>
         </div>
 
@@ -328,3 +336,49 @@
         </p>
     </form>
 </div>
+
+<script>
+    jQuery(document).ready(function ($) {
+        $('#ail-force-update-btn').on('click', function () {
+            var btn = $(this);
+            var spinner = $('#ail-update-spinner');
+            var result = $('#ail-update-result');
+
+            btn.prop('disabled', true);
+            spinner.addClass('is-active');
+            result.html('');
+
+            $.ajax({
+                url: ajaxurl,
+                type: 'POST',
+                data: {
+                    action: 'ail_force_update_check',
+                    nonce: '<?php echo wp_create_nonce("ail_force_update"); ?>'
+                },
+                success: function (response) {
+                    spinner.removeClass('is-active');
+                    btn.prop('disabled', false);
+
+                    if (response.success) {
+                        var color = response.data.has_update ? '#d63638' : '#00a32a';
+                        var html = '<div style="padding:16px; background:var(--ail-bg-canvas); border:1px solid var(--ail-border); border-left:4px solid ' + color + '; border-radius:6px;">';
+                        html += '<strong style="display:block; margin-bottom:8px;">' + response.data.message + '</strong>';
+                        if (response.data.has_update) {
+                            html += 'Current Version: <code>' + response.data.current_version + '</code> → Latest: <code>' + response.data.latest_version + '</code><br>';
+                            html += '<a href="<?php echo admin_url('plugins.php'); ?>" class="ail-btn ail-btn-primary" style="margin-top:12px;">Go to Plugins to Update</a>';
+                        }
+                        html += '</div>';
+                        result.html(html);
+                    } else {
+                        result.html('<div style="color:var(--ail-danger);">' + (response.data || 'Failed to check') + '</div>');
+                    }
+                },
+                error: function () {
+                    spinner.removeClass('is-active');
+                    btn.prop('disabled', false);
+                    result.html('<div style="color:var(--ail-danger);">Connection error.</div>');
+                }
+            });
+        });
+    });
+</script>
