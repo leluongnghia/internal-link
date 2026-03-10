@@ -79,6 +79,12 @@ function run_ai_internal_linker()
 	}
 	new AIL_Sweeper();
 
+	// Initialize Link Indexer
+	if (!class_exists('AIL_Link_Indexer')) {
+		require_once plugin_dir_path(__FILE__) . 'includes/class-ail-link-indexer.php';
+	}
+	new AIL_Link_Indexer();
+
 	// Check GitHub Updater Settings
 	$github_url = get_option('ail_github_updater_url', '');
 	$github_token = get_option('ail_github_updater_token', '');

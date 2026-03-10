@@ -176,6 +176,41 @@ class AIL_Sweeper
     {
         $manual_links = get_option('ail_manual_links', array());
 
+        // Extract successful AI links to use as an "Auto-Link Dictionary".
+        // This fulfills the goal: "hãy ghi nhớ hoặc lưu lại những từ khoá + link đã được ai quét"
+        $upload_dir = wp_upload_dir();
+        $log_file = trailingslashit($upload_dir['basedir']) . 'ail-anchors.json';
+
+        $ai_links = array();
+        if (file_exists($log_file)) {
+            $json = file_get_contents($log_file);
+            $data = json_decode($json, true);
+            if (is_array($data)) {
+                // Sort array to get most used first
+                usort($data, function ($a, $b) {
+                    return intval($b['usage_count']) - intval($a['usage_count']);
+                });
+                // Slice top 500
+                $ai_links = array_slice($data, 0, 500);
+            }
+        }
+
+        if (!empty($ai_links) && is_array($ai_links)) {
+            // Need to map JSON format to expected format
+            $mapped_ai_links = array();
+            foreach ($ai_links as $link) {
+                if (isset($link['phrase']) && isset($link['url'])) {
+                    $mapped_ai_links[] = array(
+                        'phrase' => $link['phrase'],
+                        'url' => $link['url']
+                    );
+                }
+            }
+            $manual_links = array_merge($manual_links, $mapped_ai_links);
+            // Remove duplicates based on phrase
+            $manual_links = array_map("unserialize", array_unique(array_map("serialize", $manual_links)));
+        }
+
         if (empty($manual_links) || !is_array($manual_links)) {
             return;
         }
@@ -295,12 +330,22 @@ class AIL_Sweeper
      */
     private function has_exceeded_anchor_limit($phrase, $url, $max_limit)
     {
-        global $wpdb;
-        $table_name = $wpdb->prefix . 'ail_anchor_log';
+        $upload_dir = wp_upload_dir();
+        $log_file = trailingslashit($upload_dir['basedir']) . 'ail-anchors.json';
 
-        $query = $wpdb->prepare("SELECT usage_count FROM $table_name WHERE exact_phrase = %s AND target_url = %s", $phrase, $url);
-        $count = $wpdb->get_var($query);
+        if (!file_exists($log_file)) {
+            return false;
+        }
 
-        return (!empty($count) && intval($count) >= $max_limit);
+        $json = file_get_contents($log_file);
+        $data = json_decode($json, true);
+        if (!is_array($data))
+            return false;
+
+        $key = md5($phrase . $url);
+        if (isset($data[$key]) && intval($data[$key]['usage_count']) >= $max_limit) {
+            return true;
+        }
+        return false;
     }
 }

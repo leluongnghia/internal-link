@@ -61,22 +61,20 @@ class AIL_Activator
             UNIQUE KEY pillar_url (pillar_url)
         ) $charset_collate;";
 
-        $table_anchor_log = $wpdb->prefix . 'ail_anchor_log';
-        $sql_anchor_log = "CREATE TABLE $table_anchor_log (
-            id mediumint(9) NOT NULL AUTO_INCREMENT,
-            exact_phrase varchar(255) NOT NULL,
-            target_url varchar(255) NOT NULL,
-            usage_count int(11) DEFAULT 1 NOT NULL,
-            created_at datetime DEFAULT CURRENT_TIMESTAMP NOT NULL,
-            updated_at datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP NOT NULL,
-            PRIMARY KEY  (id),
-            UNIQUE KEY phrase_target (exact_phrase, target_url)
+        $table_link_stats = $wpdb->prefix . 'ail_link_stats';
+        $sql_link_stats = "CREATE TABLE $table_link_stats (
+            post_id bigint(20) NOT NULL,
+            inbound_internal_links int(11) DEFAULT 0 NOT NULL,
+            outbound_internal_links int(11) DEFAULT 0 NOT NULL,
+            last_updated datetime DEFAULT '0000-00-00 00:00:00' NOT NULL,
+            PRIMARY KEY  (post_id)
         ) $charset_collate;";
 
         require_once(ABSPATH . 'wp-admin/includes/upgrade.php');
         dbDelta($sql_logs);
         dbDelta($sql_silos);
-        dbDelta($sql_anchor_log);
+        dbDelta($sql_link_stats);
+        dbDelta($sql_link_stats);
 
         // Clear old cron
         wp_clear_scheduled_hook('ail_daily_sweep_event');

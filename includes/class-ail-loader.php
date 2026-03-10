@@ -102,6 +102,10 @@ class AIL_Loader
 
 		// Force GitHub Update Check
 		$this->add_action('wp_ajax_ail_force_update_check', $plugin_admin, 'ajax_force_update_check');
+
+		// Orphaned Posts AJAX
+		$this->add_action('wp_ajax_ail_force_link_index', $plugin_admin, 'ajax_force_link_index');
+		$this->add_action('wp_ajax_ail_auto_inbound', $plugin_admin, 'ajax_auto_inbound');
 	}
 
 	/**

@@ -50,6 +50,16 @@ class AIL_Admin
             'ai-internal-links-reports',
             array($this, 'display_plugin_reports_page')
         );
+
+        // Add Orphaned Posts Submenu
+        add_submenu_page(
+            'ai-internal-links',
+            'Orphaned Posts',
+            'Orphaned Posts',
+            'manage_options',
+            'ai-internal-links-orphaned',
+            array($this, 'display_plugin_orphaned_page')
+        );
     }
 
     /**
@@ -66,6 +76,14 @@ class AIL_Admin
     public function display_plugin_reports_page()
     {
         require_once plugin_dir_path(__FILE__) . 'partials/ail-admin-reports.php';
+    }
+
+    /**
+     * Display orphaned posts page
+     */
+    public function display_plugin_orphaned_page()
+    {
+        require_once plugin_dir_path(__FILE__) . 'partials/ail-admin-orphaned.php';
     }
 
     /**
@@ -376,4 +394,141 @@ class AIL_Admin
         ));
     }
 
+    /**
+     * AJAX handler to force link indexer
+     */
+    public function ajax_force_link_index()
+    {
+        check_ajax_referer('ail_force_link_index', 'nonce');
+
+        if (!current_user_can('manage_options')) {
+            wp_send_json_error('Permission denied');
+        }
+
+        if (!class_exists('AIL_Link_Indexer')) {
+            require_once plugin_dir_path(dirname(__FILE__)) . 'includes/class-ail-link-indexer.php';
+        }
+
+        // Delete lock to force run
+        delete_transient('ail_link_indexing_lock');
+
+        // We run it directly. It has built-in execution limits but we'll try to run enough to make a difference
+        $indexer = new AIL_Link_Indexer();
+        $indexer->run_link_indexing();
+
+        $pointer = (int) get_option('ail_link_index_queue_pointer', 0);
+        $queue_json = get_option('ail_link_index_queue', '');
+        $queue = json_decode($queue_json, true);
+        $total = is_array($queue) ? count($queue) : 0;
+
+        if ($total === 0 || $pointer >= $total) {
+            wp_send_json_success(array('message' => 'Index complete!'));
+        } else {
+            wp_send_json_success(array('message' => "Indexing... ($pointer / $total). The process will continue in the background."));
+        }
+    }
+
+    /**
+     * AJAX handler for Auto-Inbound Link (One Click Setup)
+     */
+    public function ajax_auto_inbound()
+    {
+        check_ajax_referer('ail_auto_inbound_' . $_POST['post_id'], 'nonce');
+
+        $target_post_id = intval($_POST['post_id']);
+        if (!current_user_can('edit_post', $target_post_id)) {
+            wp_send_json_error('Permission denied');
+        }
+
+        // 1. Get the orphaned post
+        $target_post = get_post($target_post_id);
+        if (!$target_post) {
+            wp_send_json_error('Post not found');
+        }
+
+        if (!class_exists('AIL_Retriever')) {
+            require_once plugin_dir_path(dirname(__FILE__)) . 'includes/class-ail-retriever.php';
+        }
+        if (!class_exists('AIL_Injector')) {
+            require_once plugin_dir_path(dirname(__FILE__)) . 'includes/class-ail-injector.php';
+        }
+
+        $retriever = new AIL_Retriever();
+        $injector = new AIL_Injector();
+
+        // Let's find some OTHER posts that might be relevant to THIS orphaned post.
+        // We can just use the retriever with the target post ID. The retriever excludes the post ID itself.
+        // It brings back posts in the same category/tag etc. (Based on strategy).
+        $candidates = $retriever->get_candidate_posts($target_post_id, 10); // get top 10
+
+        if (empty($candidates)) {
+            wp_send_json_error('No related posts found to scan. Add more content to the same category first.');
+        }
+
+        // Create the single candidate target for AI (The orphaned post)
+        // AIL_Retriever has get_short_summary but it's private. Let's just build it manually.
+        $target_summary = wp_trim_words(wp_strip_all_tags(mb_substr($target_post->post_content, 0, 400)), 15, '...');
+
+        $orphaned_candidate = array(
+            array(
+                'id' => $target_post_id,
+                'title' => $target_post->post_title,
+                'url' => get_permalink($target_post_id),
+                'summary' => $target_summary
+            )
+        );
+
+        $links_created = 0;
+        $processed = 0;
+
+        // Loop through related posts and try to inject a link TO the orphaned post
+        foreach ($candidates as $candidate_post) {
+            if ($links_created >= 3) {
+                break; // Stop after creating 3 inbound links for this post per click
+            }
+
+            $source_post_id = $candidate_post['id'];
+            $source_post = get_post($source_post_id);
+            if (!$source_post)
+                continue;
+
+            $content = $source_post->post_content;
+
+            // To do this, we need a slightly modified injection approach.
+            // But luckily, AIL_Injector::suggest_links or AIL_Injector internal logic can take any candidate list!
+            // Let's directly call AI API using a custom prompt tailored for ONE target URL
+
+            // Re-use injector, maybe use reflection or a simpler approach? Let's just process the content!
+            // Wait, we can mock the environment by passing the orphaned post as the ONLY candidate to the AI.
+            // But AIL_Injector::inject_links fetches candidates INSIDE the method. So we can't inject candidates directly.
+            // We'll need a new method in Injector or we can write a custom prompt here. Let's add cross-link capacity.
+
+            // Since Injector is self-contained and hardcoded to fetch candidates, let's call AI directly here for simplicity,
+            // or add a method to Injector.
+
+            // I'll add a method `inject_specific_links($content, $target_candidates, $source_post_id)` to AIL_Injector
+            if (method_exists($injector, 'inject_specific_links')) {
+                $new_content = $injector->inject_specific_links($content, $orphaned_candidate, $source_post_id);
+                if ($new_content && $new_content !== $content) {
+                    wp_update_post(array(
+                        'ID' => $source_post_id,
+                        'post_content' => $new_content
+                    ));
+                    $links_created++;
+
+                    // Update stats
+                    global $wpdb;
+                    $table = $wpdb->prefix . 'ail_link_stats';
+                    $wpdb->query("UPDATE $table SET inbound_internal_links = inbound_internal_links + 1 WHERE post_id = $target_post_id");
+                }
+            }
+            $processed++;
+        }
+
+        if ($links_created > 0) {
+            wp_send_json_success(array('message' => "Successfully injected $links_created inbound links from $processed related posts!"));
+        } else {
+            wp_send_json_error("AI analyzed $processed posts but couldn't find a natural context to link back to this post.");
+        }
+    }
 }

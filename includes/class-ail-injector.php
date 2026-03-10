@@ -152,44 +152,54 @@ class AIL_Injector
      */
     private function has_exceeded_anchor_limit($phrase, $url, $limit)
     {
-        global $wpdb;
-        $table = $wpdb->prefix . 'ail_anchor_log';
+        $upload_dir = wp_upload_dir();
+        $log_file = trailingslashit($upload_dir['basedir']) . 'ail-anchors.json';
 
-        $count = $wpdb->get_var($wpdb->prepare(
-            "SELECT usage_count FROM $table WHERE exact_phrase = %s AND target_url = %s",
-            $phrase,
-            $url
-        ));
+        if (!file_exists($log_file)) {
+            return false;
+        }
 
-        return intval($count) >= $limit;
+        $json = file_get_contents($log_file);
+        $data = json_decode($json, true);
+        if (!is_array($data))
+            return false;
+
+        $key = md5($phrase . $url);
+        if (isset($data[$key]) && intval($data[$key]['usage_count']) >= $limit) {
+            return true;
+        }
+        return false;
     }
 
     /**
-     * Log anchor usage
+     * Log anchor usage (Saved to JSON File to save DB space)
      */
     public function log_anchor_usage($phrase, $url)
     {
-        global $wpdb;
-        $table = $wpdb->prefix . 'ail_anchor_log';
+        $upload_dir = wp_upload_dir();
+        $log_file = trailingslashit($upload_dir['basedir']) . 'ail-anchors.json';
 
-        $exists = $wpdb->get_var($wpdb->prepare(
-            "SELECT id FROM $table WHERE exact_phrase = %s AND target_url = %s",
-            $phrase,
-            $url
-        ));
-
-        if ($exists) {
-            $wpdb->query($wpdb->prepare(
-                "UPDATE $table SET usage_count = usage_count + 1 WHERE id = %d",
-                $exists
-            ));
-        } else {
-            $wpdb->insert($table, array(
-                'exact_phrase' => $phrase,
-                'target_url' => $url,
-                'usage_count' => 1
-            ));
+        $data = array();
+        if (file_exists($log_file)) {
+            $json = file_get_contents($log_file);
+            $parsed = json_decode($json, true);
+            if (is_array($parsed)) {
+                $data = $parsed;
+            }
         }
+
+        $key = md5($phrase . $url);
+        if (isset($data[$key])) {
+            $data[$key]['usage_count']++;
+        } else {
+            $data[$key] = array(
+                'phrase' => $phrase,
+                'url' => $url,
+                'usage_count' => 1
+            );
+        }
+
+        file_put_contents($log_file, json_encode($data, JSON_PRETTY_PRINT), LOCK_EX);
     }
 
     /**
@@ -395,4 +405,88 @@ class AIL_Injector
         return $this->parse_ai_json($ai_response);
     }
 
+    /**
+     * Injects links using a SPECIFIC list of candidates (e.g. for Orphaned Posts rescue)
+     *
+     * @param string $content Source post content to modify
+     * @param array $candidates The candidate(s) to inject links for (format: array of items with id, title, url, summary)
+     * @param int $post_id Context source post ID for logging
+     * @return string Modified content
+     */
+    public function inject_specific_links($content, $candidates, $post_id)
+    {
+        if (empty($this->api_key) || empty($candidates)) {
+            return $content;
+        }
+
+        $max_links = 1; // For orphaned posts, we just need 1 link from this source post to the orphan
+        $max_repeat = intval(get_option('ail_max_anchor_repeat', 3));
+
+        $prompt = "You are an expert SEO editor. Your task is to find exactly ONE phrase in the HTML content below to turn into an internal link pointing to the TARGET URL.\n\n";
+        $prompt .= "### TARGET LINK:\n";
+        foreach ($candidates as $c) {
+            $prompt .= "- URL: {$c['url']} | Topic/Summary: {$c['summary']}\n";
+        }
+        $prompt .= "\n### INSTRUCTIONS:\n";
+        $prompt .= "1. Read the provided TEXT CONTENT. Find exactly 1 opportunity that naturally contextually fits to link to the TARGET URL.\n";
+        $prompt .= "2. STRICT RULE: the anchor text MUST BE an EXACT case-sensitive substring from the text content. Do NOT make up phrases not currently in the text.\n";
+        $prompt .= "3. DO NOT wrap phrases that are already inside <a> tags or headings.\n";
+        $prompt .= "4. ONLY RETURN VALID JSON in the following array format:\n";
+        $prompt .= "[\n  {\"exact_phrase\": \"string from text\", \"target_url\": \"URL from target\"}\n]\n";
+        $prompt .= "5. Return nothing else but the JSON array.\n";
+
+        $clean_text = wp_strip_all_tags($content);
+        $prompt .= "\n### TEXT CONTENT:\n" . $clean_text;
+
+        $ai_response = $this->call_ai_api($prompt);
+
+        if (!$ai_response || is_wp_error($ai_response)) {
+            return $content;
+        }
+
+        $link_mappings = $this->parse_ai_json($ai_response);
+        if (empty($link_mappings)) {
+            return $content;
+        }
+
+        if (!class_exists('AIL_HTMLParser')) {
+            require_once plugin_dir_path(__FILE__) . 'class-ail-html-parser.php';
+        }
+
+        $modified_content = $content;
+        $links_injected = 0;
+
+        foreach ($link_mappings as $mapping) {
+            if ($links_injected >= $max_links)
+                break;
+
+            if (!isset($mapping['exact_phrase']) || !isset($mapping['target_url'])) {
+                continue;
+            }
+
+            $phrase = trim($mapping['exact_phrase']);
+            $url = esc_url_raw($mapping['target_url']);
+
+            if (empty($phrase) || empty($url))
+                continue;
+
+            if ($this->has_exceeded_anchor_limit($phrase, $url, $max_repeat)) {
+                continue;
+            }
+
+            $new_content = AIL_HTMLParser::replace_phrase($modified_content, $phrase, $url);
+
+            if ($new_content !== $modified_content) {
+                $modified_content = $new_content;
+                $links_injected++;
+                $this->log_anchor_usage($phrase, $url);
+            }
+        }
+
+        if ($links_injected > 0) {
+            $this->log_action($post_id, $links_injected, $this->provider . ' (Orphan Rescue)');
+        }
+
+        return $modified_content;
+    }
 }
