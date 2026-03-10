@@ -100,13 +100,19 @@
                         <td>
                             <?php $g_model = get_option('ail_gemini_model', 'gemini-1.5-pro'); ?>
                             <select name="ail_gemini_model" class="ail-select">
-                                <option value="gemini-2.5-flash" <?php selected($g_model, 'gemini-2.5-flash'); ?>>Gemini 2.5 Flash</option>
-                                <option value="gemini-2.0-flash" <?php selected($g_model, 'gemini-2.0-flash'); ?>>Gemini 2.0 Flash</option>
+                                <option value="gemini-2.5-flash" <?php selected($g_model, 'gemini-2.5-flash'); ?>>Gemini
+                                    2.5 Flash</option>
+                                <option value="gemini-2.0-flash" <?php selected($g_model, 'gemini-2.0-flash'); ?>>Gemini
+                                    2.0 Flash</option>
                                 <option value="gemini-2.0-flash-lite" <?php selected($g_model, 'gemini-2.0-flash-lite'); ?>>Gemini 2.0 Flash-Lite</option>
-                                <option value="gemini-2.0-pro-exp" <?php selected($g_model, 'gemini-2.0-pro-exp'); ?>>Gemini 2.0 Pro Experimental</option>
-                                <option value="gemini-1.5-pro" <?php selected($g_model, 'gemini-1.5-pro'); ?>>Gemini 1.5 Pro</option>
-                                <option value="gemini-1.5-flash" <?php selected($g_model, 'gemini-1.5-flash'); ?>>Gemini 1.5 Flash</option>
-                                <option value="gemini-1.5-flash-8b" <?php selected($g_model, 'gemini-1.5-flash-8b'); ?>>Gemini 1.5 Flash-8B</option>
+                                <option value="gemini-2.0-pro-exp" <?php selected($g_model, 'gemini-2.0-pro-exp'); ?>>
+                                    Gemini 2.0 Pro Experimental</option>
+                                <option value="gemini-1.5-pro" <?php selected($g_model, 'gemini-1.5-pro'); ?>>Gemini 1.5
+                                    Pro</option>
+                                <option value="gemini-1.5-flash" <?php selected($g_model, 'gemini-1.5-flash'); ?>>Gemini
+                                    1.5 Flash</option>
+                                <option value="gemini-1.5-flash-8b" <?php selected($g_model, 'gemini-1.5-flash-8b'); ?>>
+                                    Gemini 1.5 Flash-8B</option>
                             </select>
                         </td>
                     </tr>
@@ -249,6 +255,7 @@
                         <th scope="row">Auto-Link on Save</th>
                         <td>
                             <label class="ail-toggle">
+                                <input type="hidden" name="ail_auto_on_save" value="0">
                                 <input type="checkbox" name="ail_auto_on_save" value="1" <?php checked(get_option('ail_auto_on_save'), 1); ?>>
                                 <span class="ail-toggle-slider"></span>
                             </label>
@@ -260,6 +267,7 @@
                         <th scope="row">Background processing</th>
                         <td>
                             <label class="ail-toggle">
+                                <input type="hidden" name="ail_background_mode" value="0">
                                 <input type="checkbox" name="ail_background_mode" value="1" <?php checked(get_option('ail_background_mode'), 1); ?>>
                                 <span class="ail-toggle-slider"></span>
                             </label>
@@ -277,6 +285,7 @@
                         <th scope="row">Enable Daily Cron</th>
                         <td>
                             <label class="ail-toggle">
+                                <input type="hidden" name="ail_batch_enabled" value="0">
                                 <input type="checkbox" name="ail_batch_enabled" value="1" <?php checked(get_option('ail_batch_enabled', 1), 1); ?>>
                                 <span class="ail-toggle-slider"></span>
                             </label>
@@ -308,7 +317,8 @@
                             <input type="password" name="ail_github_updater_token" class="ail-input"
                                 value="<?php echo esc_attr(get_option('ail_github_updater_token')); ?>"
                                 placeholder="ghp_..." />
-                            <span class="ail-help-text">Required if repository is Private or to bypass rate limits.</span>
+                            <span class="ail-help-text">Required if repository is Private or to bypass rate
+                                limits.</span>
                         </td>
                     </tr>
                 </table>
@@ -373,53 +383,53 @@
 </div>
 
 <script type="text/javascript">
-document.getElementById('ail-force-update-btn').addEventListener('click', function () {
-    var btn     = this;
-    var spinner = document.getElementById('ail-check-spinner');
-    var result  = document.getElementById('ail-update-result');
+    document.getElementById('ail-force-update-btn').addEventListener('click', function () {
+        var btn = this;
+        var spinner = document.getElementById('ail-check-spinner');
+        var result = document.getElementById('ail-update-result');
 
-    btn.disabled          = true;
-    spinner.style.display = 'inline-block';
-    result.innerHTML      = '';
+        btn.disabled = true;
+        spinner.style.display = 'inline-block';
+        result.innerHTML = '';
 
-    var data = new FormData();
-    data.append('action', 'ail_force_update_check');
-    data.append('nonce',  '<?php echo wp_create_nonce('ail_force_update'); ?>');
+        var data = new FormData();
+        data.append('action', 'ail_force_update_check');
+        data.append('nonce', '<?php echo wp_create_nonce('ail_force_update'); ?>');
 
-    fetch('<?php echo admin_url('admin-ajax.php'); ?>', {
-        method: 'POST',
-        body: data,
-        credentials: 'same-origin'
-    })
-    .then(function (r) { return r.json(); })
-    .then(function (resp) {
-        spinner.style.display = 'none';
-        btn.disabled          = false;
+        fetch('<?php echo admin_url('admin-ajax.php'); ?>', {
+            method: 'POST',
+            body: data,
+            credentials: 'same-origin'
+        })
+            .then(function (r) { return r.json(); })
+            .then(function (resp) {
+                spinner.style.display = 'none';
+                btn.disabled = false;
 
-        if (resp.success) {
-            var d     = resp.data;
-            var color = d.has_update ? '#d63638' : '#00a32a';
-            var html  = '<div style="padding:14px; background:var(--ail-bg-canvas); border:1px solid var(--ail-border); border-left:4px solid ' + color + '; border-radius:6px;">';
-            html += '<strong style="display:block; margin-bottom:8px; font-size:14px;">' + d.message + '</strong>';
-            html += 'Version hiện tại: <code>' + d.current_version + '</code> &nbsp;|&nbsp; ';
-            html += 'Version GitHub: <code>' + d.latest_version + '</code><br>';
-            html += 'Phát hành lúc: ' + d.published_at + '<br>';
-            if (d.has_update) {
-                html += '<a href="<?php echo admin_url('plugins.php'); ?>" class="ail-btn ail-btn-primary" style="margin-top:10px;">&#x2192; Vào Plugins để Update</a>';
-            }
-            html += '</div>';
-            result.innerHTML = html;
-        } else {
-            var msg = (resp.data && resp.data.message) ? resp.data.message : (resp.data || 'Lỗi không xác định');
-            result.innerHTML = '<div style="padding:12px; background:var(--ail-bg-canvas); border:1px solid var(--ail-border); border-left:4px solid var(--ail-danger); border-radius:6px;">'
-                + msg + '<br>Token status: ' + ((resp.data && resp.data.token_set) ? resp.data.token_set : 'N/A')
-                + '</div>';
-        }
-    })
-    .catch(function (err) {
-        spinner.style.display = 'none';
-        btn.disabled          = false;
-        result.innerHTML = '<div style="color:var(--ail-danger);">Lỗi kết nối: ' + err + '</div>';
+                if (resp.success) {
+                    var d = resp.data;
+                    var color = d.has_update ? '#d63638' : '#00a32a';
+                    var html = '<div style="padding:14px; background:var(--ail-bg-canvas); border:1px solid var(--ail-border); border-left:4px solid ' + color + '; border-radius:6px;">';
+                    html += '<strong style="display:block; margin-bottom:8px; font-size:14px;">' + d.message + '</strong>';
+                    html += 'Version hiện tại: <code>' + d.current_version + '</code> &nbsp;|&nbsp; ';
+                    html += 'Version GitHub: <code>' + d.latest_version + '</code><br>';
+                    html += 'Phát hành lúc: ' + d.published_at + '<br>';
+                    if (d.has_update) {
+                        html += '<a href="<?php echo admin_url('plugins.php'); ?>" class="ail-btn ail-btn-primary" style="margin-top:10px;">&#x2192; Vào Plugins để Update</a>';
+                    }
+                    html += '</div>';
+                    result.innerHTML = html;
+                } else {
+                    var msg = (resp.data && resp.data.message) ? resp.data.message : (resp.data || 'Lỗi không xác định');
+                    result.innerHTML = '<div style="padding:12px; background:var(--ail-bg-canvas); border:1px solid var(--ail-border); border-left:4px solid var(--ail-danger); border-radius:6px;">'
+                        + msg + '<br>Token status: ' + ((resp.data && resp.data.token_set) ? resp.data.token_set : 'N/A')
+                        + '</div>';
+                }
+            })
+            .catch(function (err) {
+                spinner.style.display = 'none';
+                btn.disabled = false;
+                result.innerHTML = '<div style="color:var(--ail-danger);">Lỗi kết nối: ' + err + '</div>';
+            });
     });
-});
 </script>
