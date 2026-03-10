@@ -99,20 +99,14 @@
                         <th scope="row">Model</th>
                         <td>
                             <?php $g_model = get_option('ail_gemini_model', 'gemini-1.5-pro'); ?>
-                            <option value="gemini-2.5-flash" <?php selected($g_model, 'gemini-2.5-flash'); ?>>Gemini 2.5
-                                Flash</option>
-                            <option value="gemini-2.0-flash" <?php selected($g_model, 'gemini-2.0-flash'); ?>>Gemini 2.0
-                                Flash</option>
-                            <option value="gemini-2.0-flash-lite" <?php selected($g_model, 'gemini-2.0-flash-lite'); ?>>
-                                Gemini 2.0 Flash-Lite</option>
-                            <option value="gemini-2.0-pro-exp" <?php selected($g_model, 'gemini-2.0-pro-exp'); ?>>Gemini
-                                2.0 Pro Experimental</option>
-                            <option value="gemini-1.5-pro" <?php selected($g_model, 'gemini-1.5-pro'); ?>>Gemini 1.5 Pro
-                            </option>
-                            <option value="gemini-1.5-flash" <?php selected($g_model, 'gemini-1.5-flash'); ?>>Gemini 1.5
-                                Flash</option>
-                            <option value="gemini-1.5-flash-8b" <?php selected($g_model, 'gemini-1.5-flash-8b'); ?>>
-                                Gemini 1.5 Flash-8B</option>
+                            <select name="ail_gemini_model" class="ail-select">
+                                <option value="gemini-2.5-flash" <?php selected($g_model, 'gemini-2.5-flash'); ?>>Gemini 2.5 Flash</option>
+                                <option value="gemini-2.0-flash" <?php selected($g_model, 'gemini-2.0-flash'); ?>>Gemini 2.0 Flash</option>
+                                <option value="gemini-2.0-flash-lite" <?php selected($g_model, 'gemini-2.0-flash-lite'); ?>>Gemini 2.0 Flash-Lite</option>
+                                <option value="gemini-2.0-pro-exp" <?php selected($g_model, 'gemini-2.0-pro-exp'); ?>>Gemini 2.0 Pro Experimental</option>
+                                <option value="gemini-1.5-pro" <?php selected($g_model, 'gemini-1.5-pro'); ?>>Gemini 1.5 Pro</option>
+                                <option value="gemini-1.5-flash" <?php selected($g_model, 'gemini-1.5-flash'); ?>>Gemini 1.5 Flash</option>
+                                <option value="gemini-1.5-flash-8b" <?php selected($g_model, 'gemini-1.5-flash-8b'); ?>>Gemini 1.5 Flash-8B</option>
                             </select>
                         </td>
                     </tr>
