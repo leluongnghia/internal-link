@@ -61,6 +61,21 @@ class AIL_Activator
             UNIQUE KEY pillar_url (pillar_url)
         ) $charset_collate;";
 
+        $table_keywords = $wpdb->prefix . 'ail_keywords';
+        $sql_keywords = "CREATE TABLE $table_keywords (
+            id bigint(20) NOT NULL AUTO_INCREMENT,
+            keyword varchar(255) NOT NULL,
+            intent varchar(100) DEFAULT '',
+            volume int(11) DEFAULT 0,
+            kd float DEFAULT 0,
+            cpc float DEFAULT 0,
+            cluster_group varchar(255) DEFAULT '',
+            is_pillar tinyint(1) DEFAULT 0,
+            imported_at datetime DEFAULT CURRENT_TIMESTAMP NOT NULL,
+            PRIMARY KEY  (id),
+            UNIQUE KEY keyword (keyword)
+        ) $charset_collate;";
+
         $table_link_stats = $wpdb->prefix . 'ail_link_stats';
         $sql_link_stats = "CREATE TABLE $table_link_stats (
             post_id bigint(20) NOT NULL,
@@ -74,7 +89,7 @@ class AIL_Activator
         dbDelta($sql_logs);
         dbDelta($sql_silos);
         dbDelta($sql_link_stats);
-        dbDelta($sql_link_stats);
+        dbDelta($sql_keywords);
 
         // Clear old cron
         wp_clear_scheduled_hook('ail_daily_sweep_event');

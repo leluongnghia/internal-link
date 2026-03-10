@@ -531,4 +531,109 @@ class AIL_Admin
             wp_send_json_error("AI analyzed $processed posts but couldn't find a natural context to link back to this post.");
         }
     }
+
+    /**
+     * AJAX handler to import keywords from an Excel (.xlsx) file
+     */
+    public function ajax_import_keywords()
+    {
+        if (!current_user_can('manage_options')) {
+            wp_send_json_error(array('message' => 'Unauthorized.'));
+        }
+
+        if (empty($_FILES['file'])) {
+            wp_send_json_error(array('message' => 'No file uploaded.'));
+        }
+
+        $file = $_FILES['file'];
+        
+        // Allowed extensions
+        $ext = strtolower(pathinfo($file['name'], PATHINFO_EXTENSION));
+        if ($ext !== 'xlsx' && $ext !== 'csv') {
+            wp_send_json_error(array('message' => 'Only .xlsx and .csv files are supported.'));
+        }
+
+        require_once plugin_dir_path(dirname(__FILE__)) . 'includes/libs/simplexlsx.php';
+        global $wpdb;
+        $table_keywords = $wpdb->prefix . 'ail_keywords';
+
+        try {
+            $imported_count = 0;
+            $skipped_count = 0;
+            
+            if ($ext === 'xlsx') {
+                if ($xlsx = \Shuchkin\SimpleXLSX::parse($file['tmp_name'])) {
+                    $rows = $xlsx->rows();
+                    $header = array_shift($rows);
+                    
+                    foreach ($rows as $row) {
+                        $keyword = isset($row[0]) ? sanitize_text_field($row[0]) : '';
+                        $intent  = isset($row[1]) ? sanitize_text_field($row[1]) : '';
+                        $volume  = isset($row[2]) ? intval(str_replace(',', '', $row[2])) : 0;
+                        $kd      = isset($row[3]) ? floatval($row[3]) : 0.0;
+                        
+                        if (empty($keyword)) continue;
+
+                        $inserted = $wpdb->insert(
+                            $table_keywords,
+                            array(
+                                'keyword' => $keyword,
+                                'intent' => $intent,
+                                'volume' => $volume,
+                                'kd' => $kd
+                            ),
+                            array('%s', '%s', '%d', '%f')
+                        );
+                        
+                        if ($inserted) {
+                            $imported_count++;
+                        } else {
+                            $skipped_count++;
+                        }
+                    }
+                } else {
+                    wp_send_json_error(array('message' => \Shuchkin\SimpleXLSX::parseError()));
+                }
+            } else if ($ext === 'csv') {
+                $handle = fopen($file['tmp_name'], "r");
+                if ($handle !== FALSE) {
+                    $header = fgetcsv($handle);
+                    while (($data = fgetcsv($handle)) !== FALSE) {
+                        $keyword = isset($data[0]) ? sanitize_text_field($data[0]) : '';
+                        $intent  = isset($data[1]) ? sanitize_text_field($data[1]) : '';
+                        $volume  = isset($data[2]) ? intval(str_replace(',', '', $data[2])) : 0;
+                        $kd      = isset($data[3]) ? floatval($data[3]) : 0.0;
+                        
+                        if (empty($keyword)) continue;
+
+                        $inserted = $wpdb->insert(
+                            $table_keywords,
+                            array(
+                                'keyword' => $keyword,
+                                'intent' => $intent,
+                                'volume' => $volume,
+                                'kd' => $kd
+                            ),
+                            array('%s', '%s', '%d', '%f')
+                        );
+                        if ($inserted) {
+                            $imported_count++;
+                        } else {
+                            $skipped_count++;
+                        }
+                    }
+                    fclose($handle);
+                }
+            }
+
+            wp_send_json_success(array(
+                'message' => sprintf('Imported %d keywords successfully. Skipped %d duplicates.', $imported_count, $skipped_count),
+                'imported' => $imported_count,
+                'duplicates' => $skipped_count
+            ));
+
+        } catch (Exception $e) {
+            wp_send_json_error(array('message' => $e->getMessage()));
+        }
+    }
 }
