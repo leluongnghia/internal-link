@@ -91,6 +91,10 @@ class AIL_Admin
         register_setting('ail_options_group', 'ail_max_links');
         register_setting('ail_options_group', 'ail_max_anchor_repeat');
 
+        // Automation / Trigger Settings
+        register_setting('ail_options_group', 'ail_auto_on_save');
+        register_setting('ail_options_group', 'ail_background_mode');
+
         // Batch Settings
         register_setting('ail_options_group', 'ail_batch_enabled');
         register_setting('ail_options_group', 'ail_batch_size');

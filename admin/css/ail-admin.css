@@ -16,7 +16,9 @@
     --ail-text-secondary:#B0BEC5;
 }
 
-/* Global Scope for AIL Admin Pages */
+/* 
+   GLOBAL SCOPE
+    */
 .toplevel_page_ai-internal-links #wpcontent,
 .ai-internal-links_page_ai-internal-links-reports #wpcontent {
     background-color: var(--ail-bg-canvas);
@@ -30,40 +32,75 @@
     color: var(--ail-text-primary);
 }
 
-.ail-wrap h1, .ail-wrap h2, .ail-wrap h3 {
-    font-family: 'Space Grotesk', sans-serif;
-    color: var(--ail-text-primary);
+/* 
+   READABILITY  Force bright text
+   WordPress overrides need !important
+    */
+.ail-wrap,
+.ail-wrap p,
+.ail-wrap span:not(.ail-toggle-slider),
+.ail-wrap li,
+.ail-wrap dt,
+.ail-wrap dd {
+    color: var(--ail-text-primary) !important;
 }
 
-/*  Readability: WordPress form-table overrides  */
-.ail-wrap .form-table th {
-    color: var(--ail-text-primary);
-    font-size: 14px;
-    font-weight: 600;
+.ail-wrap h1,
+.ail-wrap h2,
+.ail-wrap h3,
+.ail-wrap h4,
+.ail-wrap h5 {
+    color: var(--ail-text-primary) !important;
+    font-family: 'Space Grotesk', sans-serif;
+}
+
+/* form-table th  the invisible labels */
+.ail-wrap .form-table th,
+.ail-wrap .form-table th label,
+.ail-wrap .form-table > tbody > tr > th {
+    color: var(--ail-text-primary) !important;
+    font-size: 14px !important;
+    font-weight: 600 !important;
     width: 180px;
+    vertical-align: middle;
 }
-.ail-wrap .form-table td {
-    color: var(--ail-text-primary);
+
+.ail-wrap .form-table td,
+.ail-wrap .form-table > tbody > tr > td {
+    color: var(--ail-text-primary) !important;
+    vertical-align: middle;
 }
+
+.ail-wrap label,
+.ail-wrap label span:not(.ail-toggle-slider) {
+    color: var(--ail-text-primary) !important;
+}
+
 .ail-wrap .form-table .description,
 .ail-wrap p.description,
-.ail-wrap .ail-help-text {
-    color: var(--ail-text-secondary);
+.ail-wrap .ail-help-text,
+.ail-wrap .description {
+    color: var(--ail-text-secondary) !important;
     font-size: 12px;
-}
-.ail-wrap .form-table a,
-.ail-wrap p.description a {
-    color: var(--ail-accent);
-    text-decoration: none;
-}
-.ail-wrap .form-table a:hover {
-    text-decoration: underline;
-}
-.ail-wrap label {
-    color: var(--ail-text-primary);
+    margin-top: 4px;
+    display: block;
 }
 
-/* Status Bar */
+.ail-wrap a,
+.ail-wrap .form-table a,
+.ail-wrap p.description a {
+    color: var(--ail-accent) !important;
+    text-decoration: none;
+}
+.ail-wrap a:hover,
+.ail-wrap .form-table a:hover {
+    text-decoration: underline;
+    color: #00e0b3 !important;
+}
+
+/* 
+   STATUS BAR
+    */
 .ail-status-bar {
     background-color: var(--ail-bg-surface);
     border: 1px solid var(--ail-border);
@@ -81,7 +118,7 @@
     display: flex;
     align-items: center;
     gap: 8px;
-    color: var(--ail-text-primary);
+    color: var(--ail-text-primary) !important;
 }
 
 .ail-status-indicator {
@@ -98,7 +135,9 @@
     background-color: var(--ail-text-secondary);
 }
 
-/* Cards & Panels */
+/* 
+   CARDS
+    */
 .ail-card {
     background-color: var(--ail-bg-surface);
     border: 1px solid var(--ail-border);
@@ -119,17 +158,19 @@
     margin-bottom: 20px;
     font-size: 18px;
     font-weight: 600;
-    color: var(--ail-text-primary);
+    color: var(--ail-text-primary) !important;
     display: flex;
     align-items: center;
     gap: 12px;
 }
 
-/* Forms & Inputs */
+/* 
+   FORMS & INPUTS
+    */
 .ail-input, .ail-select {
     background-color: var(--ail-bg-canvas);
     border: 1px solid var(--ail-border);
-    color: var(--ail-text-primary);
+    color: var(--ail-text-primary) !important;
     border-radius: 6px;
     padding: 8px 12px;
     font-family: 'DM Sans', sans-serif;
@@ -151,12 +192,14 @@
 
 .ail-help-text {
     font-size: 12px;
-    color: var(--ail-text-secondary);
+    color: var(--ail-text-secondary) !important;
     margin-top: 6px;
     display: block;
 }
 
-/* Custom Toggle Switch */
+/* 
+   TOGGLE SWITCH
+    */
 .ail-toggle {
     position: relative;
     display: inline-block;
@@ -202,7 +245,9 @@ input:checked + .ail-toggle-slider:before {
     transform: translateX(20px);
 }
 
-/* Provider Selection Cards */
+/* 
+   PROVIDER CARDS
+    */
 .ail-provider-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
@@ -216,7 +261,7 @@ input:checked + .ail-toggle-slider:before {
 }
 
 .ail-provider-card h3 {
-    color: var(--ail-text-primary);
+    color: var(--ail-text-primary) !important;
     margin: 0 0 8px;
     font-size: 16px;
 }
@@ -232,7 +277,9 @@ input:checked + .ail-toggle-slider:before {
     filter: invert(1);
 }
 
-/* Tabs */
+/* 
+   TABS
+    */
 .ail-tabs {
     display: flex;
     gap: 2px;
@@ -269,10 +316,12 @@ input:checked + .ail-toggle-slider:before {
     animation: fadeIn 0.3s ease-in-out;
 }
 
-/* Buttons */
+/* 
+   BUTTONS
+    */
 .ail-btn {
     background-color: var(--ail-bg-elevated);
-    color: var(--ail-text-primary);
+    color: var(--ail-text-primary) !important;
     border: 1px solid var(--ail-border);
     border-radius: 6px;
     padding: 8px 16px;
@@ -288,7 +337,7 @@ input:checked + .ail-toggle-slider:before {
 
 .ail-btn:hover {
     background-color: var(--ail-border);
-    color: var(--ail-text-primary);
+    color: var(--ail-text-primary) !important;
 }
 
 .ail-btn-primary {
@@ -306,16 +355,18 @@ input:checked + .ail-toggle-slider:before {
 
 .ail-btn-secondary {
     background-color: var(--ail-bg-elevated);
-    color: var(--ail-text-primary);
+    color: var(--ail-text-primary) !important;
     border-color: var(--ail-border);
 }
 
 .ail-btn-secondary:hover {
     border-color: var(--ail-accent);
-    color: var(--ail-accent);
+    color: var(--ail-accent) !important;
 }
 
-/* Tables */
+/* 
+   TABLES
+    */
 .ail-table {
     width: 100%;
     border-collapse: separate;
@@ -349,7 +400,9 @@ input:checked + .ail-toggle-slider:before {
     to { opacity: 1; transform: translateY(0); }
 }
 
-/* Progress Panel */
+/* 
+   PROGRESS PANEL
+    */
 .ail-progress-panel {
     height: 30px;
     position: relative;
@@ -371,7 +424,7 @@ input:checked + .ail-toggle-slider:before {
     position: relative;
     overflow: hidden;
     width: 0%;
-    color: #fff;
+    color: #fff !important;
     font-size: 16px;
     font-weight: 600;
     line-height: 30px;
