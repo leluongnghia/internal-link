@@ -4,36 +4,40 @@
  * Keyword Clusters Admin Page
  * Design: Data-Dense Dashboard | Colors: #3B82F6 primary | Font: Fira Sans
  */
-if (! defined('ABSPATH')) exit;
+if (!defined('ABSPATH'))
+    exit;
 
 global $wpdb;
 $table = $wpdb->prefix . 'ail_keywords';
-$total_kw       = 0;
+$total_kw = 0;
 $total_clusters = 0;
-$total_pillars  = 0;
+$total_pillars = 0;
 
 if ($wpdb->get_var("SHOW TABLES LIKE '$table'") === $table) {
-    $total_kw       = (int) $wpdb->get_var("SELECT COUNT(*) FROM $table");
+    $total_kw = (int) $wpdb->get_var("SELECT COUNT(*) FROM $table");
     $total_clusters = (int) $wpdb->get_var("SELECT COUNT(DISTINCT cluster_group) FROM $table WHERE cluster_group != '' AND cluster_group IS NOT NULL");
-    $total_pillars  = (int) $wpdb->get_var("SELECT COUNT(*) FROM $table WHERE is_pillar = 1");
+    $total_pillars = (int) $wpdb->get_var("SELECT COUNT(*) FROM $table WHERE is_pillar = 1");
 }
 
-$run_nonce    = wp_create_nonce('ail_run_clustering');
+$run_nonce = wp_create_nonce('ail_run_clustering');
 $delete_nonce = wp_create_nonce('ail_delete_keywords');
-$page   = isset($_GET['cpage']) ? abs((int)$_GET['cpage']) : 1;
-$limit  = 30;
+$page = isset($_GET['cpage']) ? abs((int) $_GET['cpage']) : 1;
+$limit = 30;
 $offset = ($page * $limit) - $limit;
 $kw_rows = ($total_kw > 0) ? $wpdb->get_results("SELECT * FROM $table ORDER BY volume DESC LIMIT $offset, $limit") : [];
 ?>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Fira+Sans:wght@300;400;500;600;700&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
+<link
+    href="https://fonts.googleapis.com/css2?family=Fira+Sans:wght@300;400;500;600;700&family=Fira+Code:wght@400;500&display=swap"
+    rel="stylesheet">
 
 <div id="ail-kc-app">
 
     <!-- HEADER -->
     <div class="kc-header">
         <div class="kc-header__icon">
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                stroke-linecap="round" stroke-linejoin="round">
                 <circle cx="12" cy="12" r="3" />
                 <circle cx="3" cy="6" r="2" />
                 <circle cx="21" cy="6" r="2" />
@@ -50,14 +54,18 @@ $kw_rows = ($total_kw > 0) ? $wpdb->get_results("SELECT * FROM $table ORDER BY v
             <p class="kc-header__sub">Semrush-style Topic Clustering — Hub &amp; Spoke strategy for Internal Linking</p>
         </div>
         <div class="kc-header__actions">
-            <button id="kc-run-btn" class="kc-btn kc-btn--success" <?php echo !$total_kw ? 'disabled' : ''; ?> data-nonce="<?php echo esc_attr($run_nonce); ?>">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <button id="kc-run-btn" class="kc-btn kc-btn--success" <?php echo !$total_kw ? 'disabled' : ''; ?>
+                data-nonce="<?php echo esc_attr($run_nonce); ?>">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+                    stroke-linecap="round" stroke-linejoin="round">
                     <polygon points="5 3 19 12 5 21 5 3" />
                 </svg>
                 Run Clustering
             </button>
-            <button id="kc-delete-btn" class="kc-btn kc-btn--ghost-danger" <?php echo !$total_kw ? 'disabled' : ''; ?> data-nonce="<?php echo esc_attr($delete_nonce); ?>">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <button id="kc-delete-btn" class="kc-btn kc-btn--ghost-danger" <?php echo !$total_kw ? 'disabled' : ''; ?>
+                data-nonce="<?php echo esc_attr($delete_nonce); ?>">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+                    stroke-linecap="round" stroke-linejoin="round">
                     <polyline points="3 6 5 6 21 6" />
                     <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2" />
                 </svg>
@@ -73,7 +81,8 @@ $kw_rows = ($total_kw > 0) ? $wpdb->get_results("SELECT * FROM $table ORDER BY v
     <div class="kc-kpi-grid">
         <div class="kc-kpi">
             <div class="kc-kpi__icon kc-kpi__icon--blue">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                    stroke-linecap="round" stroke-linejoin="round">
                     <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
                 </svg>
             </div>
@@ -84,7 +93,8 @@ $kw_rows = ($total_kw > 0) ? $wpdb->get_results("SELECT * FROM $table ORDER BY v
         </div>
         <div class="kc-kpi">
             <div class="kc-kpi__icon kc-kpi__icon--violet">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                    stroke-linecap="round" stroke-linejoin="round">
                     <circle cx="12" cy="12" r="3" />
                     <circle cx="3" cy="6" r="2" />
                     <circle cx="21" cy="6" r="2" />
@@ -103,8 +113,10 @@ $kw_rows = ($total_kw > 0) ? $wpdb->get_results("SELECT * FROM $table ORDER BY v
         </div>
         <div class="kc-kpi">
             <div class="kc-kpi__icon kc-kpi__icon--amber">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                    stroke-linecap="round" stroke-linejoin="round">
+                    <polygon
+                        points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
                 </svg>
             </div>
             <div>
@@ -114,7 +126,8 @@ $kw_rows = ($total_kw > 0) ? $wpdb->get_results("SELECT * FROM $table ORDER BY v
         </div>
         <div class="kc-kpi">
             <div class="kc-kpi__icon kc-kpi__icon--red">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                    stroke-linecap="round" stroke-linejoin="round">
                     <circle cx="12" cy="12" r="10" />
                     <line x1="12" y1="8" x2="12" y2="12" />
                     <line x1="12" y1="16" x2="12.01" y2="16" />
@@ -133,28 +146,35 @@ $kw_rows = ($total_kw > 0) ? $wpdb->get_results("SELECT * FROM $table ORDER BY v
         <!-- LEFT: Import Panel -->
         <div class="kc-panel">
             <div class="kc-panel__head">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                    stroke-linecap="round" stroke-linejoin="round">
                     <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
                     <polyline points="17 8 12 3 7 8" />
                     <line x1="12" y1="3" x2="12" y2="15" />
                 </svg>
                 Import Keywords
             </div>
-            <p class="kc-panel__desc">Upload a Semrush / Ahrefs export (.xlsx or .csv). Expected columns: Keyword, Intent, Volume, KD.</p>
+            <p class="kc-panel__desc">Upload a Semrush / Ahrefs export (.xlsx or .csv). Expected columns: Keyword,
+                Intent, Volume, KD.</p>
             <form id="kc-import-form" enctype="multipart/form-data">
-                <div class="kc-dropzone" id="kc-dropzone" role="button" tabindex="0" aria-label="Click or drag file here">
-                    <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                <div class="kc-dropzone" id="kc-dropzone" role="button" tabindex="0"
+                    aria-label="Click or drag file here">
+                    <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" stroke-width="1.5"
+                        stroke-linecap="round" stroke-linejoin="round">
                         <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
                         <polyline points="17 8 12 3 7 8" />
                         <line x1="12" y1="3" x2="12" y2="15" />
                     </svg>
-                    <p class="kc-dropzone__text" id="kc-dz-text">Drag &amp; drop or <span class="kc-link">browse file</span></p>
+                    <p class="kc-dropzone__text" id="kc-dz-text">Drag &amp; drop or <span class="kc-link">browse
+                            file</span></p>
                     <p class="kc-dropzone__hint">.xlsx / .csv &mdash; max 5 MB</p>
-                    <input type="file" id="kc-file" name="file" accept=".xlsx,.csv" style="display:none" aria-hidden="true">
+                    <input type="file" id="kc-file" name="file" accept=".xlsx,.csv" style="display:none"
+                        aria-hidden="true">
                 </div>
                 <div id="kc-import-msg" class="kc-msg" style="display:none"></div>
                 <button type="submit" id="kc-import-btn" class="kc-btn kc-btn--primary kc-btn--full">
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+                        stroke-linecap="round" stroke-linejoin="round">
                         <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
                         <polyline points="7 10 12 15 17 10" />
                         <line x1="12" y1="15" x2="12" y2="3" />
@@ -170,7 +190,8 @@ $kw_rows = ($total_kw > 0) ? $wpdb->get_results("SELECT * FROM $table ORDER BY v
             <!-- TABS -->
             <div class="kc-tabs" role="tablist">
                 <button class="kc-tab kc-tab--active" data-tab="clusters" role="tab" aria-selected="true">
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                        stroke-linecap="round" stroke-linejoin="round">
                         <circle cx="12" cy="12" r="3" />
                         <circle cx="3" cy="6" r="2" />
                         <circle cx="21" cy="6" r="2" />
@@ -184,7 +205,8 @@ $kw_rows = ($total_kw > 0) ? $wpdb->get_results("SELECT * FROM $table ORDER BY v
                     Clusters
                 </button>
                 <button class="kc-tab" data-tab="gaps" role="tab" aria-selected="false">
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                        stroke-linecap="round" stroke-linejoin="round">
                         <circle cx="12" cy="12" r="10" />
                         <line x1="12" y1="8" x2="12" y2="12" />
                         <line x1="12" y1="16" x2="12.01" y2="16" />
@@ -192,7 +214,8 @@ $kw_rows = ($total_kw > 0) ? $wpdb->get_results("SELECT * FROM $table ORDER BY v
                     Content Gaps <span id="kc-gap-badge" class="kc-tab__badge" style="display:none"></span>
                 </button>
                 <button class="kc-tab" data-tab="keywords" role="tab" aria-selected="false">
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                        stroke-linecap="round" stroke-linejoin="round">
                         <line x1="8" y1="6" x2="21" y2="6" />
                         <line x1="8" y1="12" x2="21" y2="12" />
                         <line x1="8" y1="18" x2="21" y2="18" />
@@ -208,7 +231,8 @@ $kw_rows = ($total_kw > 0) ? $wpdb->get_results("SELECT * FROM $table ORDER BY v
             <div class="kc-tab-pane" id="kc-pane-clusters" role="tabpanel">
                 <div id="kc-clusters-empty" class="kc-empty">
                     <?php if ($total_clusters > 0): ?>
-                        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#cbd5e1" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#cbd5e1" stroke-width="1.5"
+                            stroke-linecap="round" stroke-linejoin="round">
                             <circle cx="12" cy="12" r="3" />
                             <circle cx="3" cy="6" r="2" />
                             <circle cx="21" cy="6" r="2" />
@@ -221,7 +245,8 @@ $kw_rows = ($total_kw > 0) ? $wpdb->get_results("SELECT * FROM $table ORDER BY v
                         </svg>
                         <p>Loading <?php echo $total_clusters; ?> clusters&hellip;</p>
                     <?php else: ?>
-                        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#cbd5e1" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#cbd5e1" stroke-width="1.5"
+                            stroke-linecap="round" stroke-linejoin="round">
                             <circle cx="12" cy="12" r="3" />
                             <circle cx="3" cy="6" r="2" />
                             <circle cx="21" cy="6" r="2" />
@@ -241,7 +266,8 @@ $kw_rows = ($total_kw > 0) ? $wpdb->get_results("SELECT * FROM $table ORDER BY v
             <!-- TAB: GAPS -->
             <div class="kc-tab-pane" id="kc-pane-gaps" style="display:none" role="tabpanel">
                 <div id="kc-gaps-empty" class="kc-empty">
-                    <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#cbd5e1" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                    <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#cbd5e1" stroke-width="1.5"
+                        stroke-linecap="round" stroke-linejoin="round">
                         <circle cx="12" cy="12" r="10" />
                         <line x1="12" y1="8" x2="12" y2="12" />
                         <line x1="12" y1="16" x2="12.01" y2="16" />
@@ -255,7 +281,8 @@ $kw_rows = ($total_kw > 0) ? $wpdb->get_results("SELECT * FROM $table ORDER BY v
             <div class="kc-tab-pane" id="kc-pane-keywords" style="display:none" role="tabpanel">
                 <?php if (empty($kw_rows)): ?>
                     <div class="kc-empty">
-                        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#cbd5e1" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#cbd5e1" stroke-width="1.5"
+                            stroke-linecap="round" stroke-linejoin="round">
                             <line x1="8" y1="6" x2="21" y2="6" />
                             <line x1="8" y1="12" x2="21" y2="12" />
                             <line x1="8" y1="18" x2="21" y2="18" />
@@ -295,14 +322,22 @@ $kw_rows = ($total_kw > 0) ? $wpdb->get_results("SELECT * FROM $table ORDER BY v
                                         $ic = '#92400e';
                                         $ib = '#fef3c7';
                                     }
-                                ?>
+                                    ?>
                                     <tr>
                                         <td class="kc-table__kw"><?php echo esc_html($row->keyword); ?></td>
-                                        <td><?php if ($row->intent): ?><span class="kc-chip" style="background:<?php echo $ib ?>;color:<?php echo $ic ?>"><?php echo esc_html(ucfirst($row->intent)); ?></span><?php else: ?>—<?php endif; ?></td>
+                                        <td><?php if ($row->intent): ?><span class="kc-chip"
+                                                    style="background:<?php echo $ib ?>;color:<?php echo $ic ?>"><?php echo esc_html(ucfirst($row->intent)); ?></span><?php else: ?>—<?php endif; ?>
+                                        </td>
                                         <td class="kc-table__num"><?php echo number_format($row->volume); ?></td>
-                                        <td><span class="kc-kd" style="color:<?php echo $row->kd > 50 ? '#ef4444' : ($row->kd > 30 ? '#f59e0b' : '#10b981') ?>"><?php echo esc_html($row->kd); ?></span></td>
-                                        <td><?php echo $row->cluster_group ? '<span class="kc-chip kc-chip--cluster">' . esc_html($row->cluster_group) . '</span>' : '<span class="kc-muted">—</span>'; ?></td>
-                                        <td><?php if ($row->is_pillar): ?><span class="kc-chip kc-chip--pillar">Pillar</span><?php elseif ($row->cluster_group): ?><span class="kc-chip kc-chip--spoke">Spoke</span><?php else: ?><span class="kc-muted">—</span><?php endif; ?></td>
+                                        <td><span class="kc-kd"
+                                                style="color:<?php echo $row->kd > 50 ? '#ef4444' : ($row->kd > 30 ? '#f59e0b' : '#10b981') ?>"><?php echo esc_html($row->kd); ?></span>
+                                        </td>
+                                        <td><?php echo $row->cluster_group ? '<span class="kc-chip kc-chip--cluster">' . esc_html($row->cluster_group) . '</span>' : '<span class="kc-muted">—</span>'; ?>
+                                        </td>
+                                        <td><?php if ($row->is_pillar): ?><span
+                                                    class="kc-chip kc-chip--pillar">Pillar</span><?php elseif ($row->cluster_group): ?><span
+                                                    class="kc-chip kc-chip--spoke">Spoke</span><?php else: ?><span
+                                                    class="kc-muted">—</span><?php endif; ?></td>
                                     </tr>
                                 <?php endforeach; ?>
                             </tbody>
@@ -321,27 +356,34 @@ $kw_rows = ($total_kw > 0) ? $wpdb->get_results("SELECT * FROM $table ORDER BY v
 </div><!-- #ail-kc-app -->
 
 <script>
-    (function($) {
+    (function ($) {
         // ─── Tabs ────────────────────────────────────────────────────────────
-        $('.kc-tab').on('click', function() {
+        var clusterDataLoaded = false;
+        $('.kc-tab').on('click', function () {
             var t = $(this).data('tab');
             $('.kc-tab').removeClass('kc-tab--active').attr('aria-selected', 'false');
             $(this).addClass('kc-tab--active').attr('aria-selected', 'true');
             $('.kc-tab-pane').hide();
             $('#kc-pane-' + t).show();
+
+            // Lazy-load cluster + gap data when user clicks the Gaps tab
+            if ((t === 'gaps' || t === 'clusters') && !clusterDataLoaded && <?php echo $total_clusters > 0 ? 'true' : 'false'; ?>) {
+                clusterDataLoaded = true;
+                loadClusters();
+            }
         });
 
         // ─── Dropzone ────────────────────────────────────────────────────────
         var $dz = $('#kc-dropzone'),
             $fi = $('#kc-file');
-        $dz.on('click keydown', function(e) {
+        $dz.on('click keydown', function (e) {
             if (e.type === 'click' || e.key === ' ' || e.key === 'Enter') $fi.click();
         });
-        $dz.on('dragover', function(e) {
+        $dz.on('dragover', function (e) {
             e.preventDefault();
             $dz.addClass('kc-dropzone--over');
         });
-        $dz.on('dragleave drop', function(e) {
+        $dz.on('dragleave drop', function (e) {
             e.preventDefault();
             $dz.removeClass('kc-dropzone--over');
             if (e.type === 'drop') {
@@ -352,7 +394,7 @@ $kw_rows = ($total_kw > 0) ? $wpdb->get_results("SELECT * FROM $table ORDER BY v
                 }
             }
         });
-        $fi.on('change', function() {
+        $fi.on('change', function () {
             if (this.files.length) setFileName(this.files[0].name);
         });
 
@@ -361,7 +403,7 @@ $kw_rows = ($total_kw > 0) ? $wpdb->get_results("SELECT * FROM $table ORDER BY v
         }
 
         // ─── Import ──────────────────────────────────────────────────────────
-        $('#kc-import-form').on('submit', function(e) {
+        $('#kc-import-form').on('submit', function (e) {
             e.preventDefault();
             var f = $fi[0].files[0];
             if (!f) {
@@ -378,10 +420,10 @@ $kw_rows = ($total_kw > 0) ? $wpdb->get_results("SELECT * FROM $table ORDER BY v
                 data: fd,
                 processData: false,
                 contentType: false,
-                success: function(r) {
+                success: function (r) {
                     if (r.success) {
                         showMsg('#kc-import-msg', r.data.message, 'success');
-                        setTimeout(function() {
+                        setTimeout(function () {
                             location.reload();
                         }, 1600);
                     } else {
@@ -389,7 +431,7 @@ $kw_rows = ($total_kw > 0) ? $wpdb->get_results("SELECT * FROM $table ORDER BY v
                         setBtn('#kc-import-btn', false, 'Start Import');
                     }
                 },
-                error: function() {
+                error: function () {
                     showMsg('#kc-import-msg', 'Server error.', 'error');
                     setBtn('#kc-import-btn', false, 'Start Import');
                 }
@@ -397,13 +439,13 @@ $kw_rows = ($total_kw > 0) ? $wpdb->get_results("SELECT * FROM $table ORDER BY v
         });
 
         // ─── Run Clustering ──────────────────────────────────────────────────
-        $('#kc-run-btn').on('click', function() {
+        $('#kc-run-btn').on('click', function () {
             var nonce = $(this).data('nonce');
             setBtn('#kc-run-btn', true, 'Running\u2026');
             $.post(ajaxurl, {
                 action: 'ail_run_clustering',
                 nonce: nonce
-            }, function(r) {
+            }, function (r) {
                 setBtn('#kc-run-btn', false, 'Run Clustering');
                 if (r.success) {
                     showStatus(r.data.message, 'success');
@@ -413,14 +455,14 @@ $kw_rows = ($total_kw > 0) ? $wpdb->get_results("SELECT * FROM $table ORDER BY v
         });
 
         // ─── Delete / Reset ──────────────────────────────────────────────────
-        $('#kc-delete-btn').on('click', function() {
+        $('#kc-delete-btn').on('click', function () {
             if (!confirm('Delete ALL imported keywords and clusters? This cannot be undone.')) return;
             var nonce = $(this).data('nonce');
             setBtn('#kc-delete-btn', true, 'Deleting\u2026');
             $.post(ajaxurl, {
                 action: 'ail_delete_keywords',
                 nonce: nonce
-            }, function(r) {
+            }, function (r) {
                 if (r.success) location.reload();
                 else {
                     showStatus(r.data.message || 'Delete failed.', 'error');
@@ -435,7 +477,7 @@ $kw_rows = ($total_kw > 0) ? $wpdb->get_results("SELECT * FROM $table ORDER BY v
             $('#kc-clusters-grid').hide();
             $.post(ajaxurl, {
                 action: 'ail_get_cluster_data'
-            }, function(r) {
+            }, function (r) {
                 if (!r.success) return;
                 var clusters = r.data.clusters,
                     gaps = r.data.gaps;
@@ -454,7 +496,7 @@ $kw_rows = ($total_kw > 0) ? $wpdb->get_results("SELECT * FROM $table ORDER BY v
                     return;
                 }
                 var html = '';
-                $.each(clusters, function(_, c) {
+                $.each(clusters, function (_, c) {
                     var intentMap = {
                         info: 'kc-cluster--info',
                         transact: 'kc-cluster--transact',
@@ -463,7 +505,7 @@ $kw_rows = ($total_kw > 0) ? $wpdb->get_results("SELECT * FROM $table ORDER BY v
                     };
                     var ic = '';
                     var intentLow = (c.intent || '').toLowerCase();
-                    $.each(intentMap, function(k, v) {
+                    $.each(intentMap, function (k, v) {
                         if (intentLow.indexOf(k) !== -1) {
                             ic = v;
                             return false;
@@ -476,7 +518,7 @@ $kw_rows = ($total_kw > 0) ? $wpdb->get_results("SELECT * FROM $table ORDER BY v
 
                     var spokesHtml = '';
                     if (c.spokes && c.spokes.length) {
-                        $.each(c.spokes.slice(0, 8), function(_, s) {
+                        $.each(c.spokes.slice(0, 8), function (_, s) {
                             spokesHtml += '<div class="kc-spoke"><span class="kc-spoke__kw">' + esc(s.keyword) + '</span><span class="kc-spoke__vol">' + numFmt(s.volume) + '</span></div>';
                         });
                         if (c.spokes.length > 8) spokesHtml += '<div class="kc-spoke kc-spoke--more">+' + (c.spokes.length - 8) + ' more</div>';
@@ -513,7 +555,7 @@ $kw_rows = ($total_kw > 0) ? $wpdb->get_results("SELECT * FROM $table ORDER BY v
                 var gh = '<div class="kc-gap-notice"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle;margin-right:6px"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>' +
                     '<strong>' + gaps.length + ' cluster' + (gaps.length !== 1 ? 's' : '') + '</strong> missing a post. Create content for these Pillar keywords.</div>' +
                     '<div class="kc-table-wrap"><table class="kc-table"><thead><tr><th>Pillar Keyword</th><th>Cluster</th><th>Volume</th><th>Intent</th><th>Action</th></tr></thead><tbody>';
-                $.each(gaps, function(_, g) {
+                $.each(gaps, function (_, g) {
                     gh += '<tr>' +
                         '<td class="kc-table__kw">' + esc(g.keyword) + '</td>' +
                         '<td><span class="kc-chip kc-chip--cluster">' + esc(g.cluster_group) + '</span></td>' +
@@ -543,7 +585,7 @@ $kw_rows = ($total_kw > 0) ? $wpdb->get_results("SELECT * FROM $table ORDER BY v
 
         function showStatus(msg, type) {
             $('#kc-status-bar').attr('class', 'kc-status-bar kc-status-bar--' + type).html(msg).show();
-            setTimeout(function() {
+            setTimeout(function () {
                 $('#kc-status-bar').fadeOut();
             }, 5000);
         }
@@ -558,7 +600,7 @@ $kw_rows = ($total_kw > 0) ? $wpdb->get_results("SELECT * FROM $table ORDER BY v
 
         // ─── Auto-load on page open if clusters exist ─────────────────────
         <?php if ($total_clusters > 0): ?>loadClusters();
-    <?php endif; ?>
+        <?php endif; ?>
 
     })(jQuery);
 </script>
