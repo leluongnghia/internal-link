@@ -646,26 +646,37 @@ class AIL_Admin
      */
     public function ajax_import_keywords()
     {
+        $log = plugin_dir_path(dirname(__FILE__)) . 'ail_import_debug.log';
+        file_put_contents($log, "--- Start Import ---\n", FILE_APPEND);
+
         if (!current_user_can('manage_options')) {
+            file_put_contents($log, "Unauthorized\n", FILE_APPEND);
             wp_send_json_error(array('message' => 'Unauthorized.'));
         }
 
         if (empty($_FILES['file'])) {
+            $err = isset($_FILES['file']['error']) ? $_FILES['file']['error'] : 'no_error_code';
+            file_put_contents($log, "Empty FILE. Error code: $err\n", FILE_APPEND);
             wp_send_json_error(array('message' => 'No file uploaded.'));
         }
 
         $file = $_FILES['file'];
+        file_put_contents($log, "File received: " . print_r($file, true) . "\n", FILE_APPEND);
 
         // Allowed extensions
         $ext = strtolower(pathinfo($file['name'], PATHINFO_EXTENSION));
         if ($ext !== 'xlsx' && $ext !== 'csv') {
+            file_put_contents($log, "Invalid ext: $ext\n", FILE_APPEND);
             wp_send_json_error(array('message' => 'Only .xlsx and .csv files are supported.'));
         }
 
+        file_put_contents($log, "Loading library...\n", FILE_APPEND);
         require_once plugin_dir_path(dirname(__FILE__)) . 'includes/libs/simplexlsx.php';
+
         global $wpdb;
         $table_keywords = $wpdb->prefix . 'ail_keywords';
 
+        file_put_contents($log, "Setting limits...\n", FILE_APPEND);
         ob_start(); // Prevent PHP warnings from corrupting the JSON response
         @set_time_limit(0);
 
@@ -674,45 +685,57 @@ class AIL_Admin
             $skipped_count = 0;
 
             if ($ext === 'xlsx') {
+                file_put_contents($log, "Parsing xlsx...\n", FILE_APPEND);
                 if ($xlsx = \Shuchkin\SimpleXLSX::parse($file['tmp_name'])) {
                     $rows = $xlsx->rows();
+                    file_put_contents($log, "Rows returned: " . (is_array($rows) ? count($rows) : 'not array') . "\n", FILE_APPEND);
                     if (!$rows || !is_array($rows)) {
                         ob_end_clean();
+                        file_put_contents($log, "No data in xlsx\n", FILE_APPEND);
                         wp_send_json_error(array('message' => 'The uploaded Excel file has no data or is in an unsupported format.'));
                         return;
                     }
                     $header = array_shift($rows);
+                    file_put_contents($log, "Starting iteration...\n", FILE_APPEND);
 
-                    foreach ($rows as $row) {
-                        $keyword = isset($row[0]) ? sanitize_text_field($row[0]) : '';
-                        $intent = isset($row[1]) ? sanitize_text_field($row[1]) : '';
-                        $volume = isset($row[2]) ? intval(str_replace(',', '', $row[2])) : 0;
-                        $kd = isset($row[3]) ? floatval($row[3]) : 0.0;
+                    foreach ($rows as $index => $row) {
+                        try {
+                            $keyword = isset($row[0]) ? sanitize_text_field($row[0]) : '';
+                            $intent = isset($row[1]) ? sanitize_text_field($row[1]) : '';
+                            $volume = isset($row[2]) ? intval(str_replace(',', '', $row[2])) : 0;
+                            $kd = isset($row[3]) ? floatval($row[3]) : 0.0;
 
-                        if (empty($keyword))
-                            continue;
+                            if (empty($keyword))
+                                continue;
 
-                        $inserted = $wpdb->insert(
-                            $table_keywords,
-                            array(
-                                'keyword' => $keyword,
-                                'intent' => $intent,
-                                'volume' => $volume,
-                                'kd' => $kd
-                            ),
-                            array('%s', '%s', '%d', '%f')
-                        );
+                            $inserted = $wpdb->insert(
+                                $table_keywords,
+                                array(
+                                    'keyword' => $keyword,
+                                    'intent' => $intent,
+                                    'volume' => $volume,
+                                    'kd' => $kd
+                                ),
+                                array('%s', '%s', '%d', '%f')
+                            );
 
-                        if ($inserted) {
-                            $imported_count++;
-                        } else {
-                            $skipped_count++;
+                            if ($inserted) {
+                                $imported_count++;
+                            } else {
+                                $skipped_count++;
+                            }
+                        } catch (\Throwable $rowEx) {
+                            file_put_contents($log, "Row $index error: " . $rowEx->getMessage() . "\n", FILE_APPEND);
                         }
                     }
+                    file_put_contents($log, "Iteration done. Imported: $imported_count\n", FILE_APPEND);
                 } else {
-                    wp_send_json_error(array('message' => \Shuchkin\SimpleXLSX::parseError()));
+                    $parseErr = \Shuchkin\SimpleXLSX::parseError();
+                    file_put_contents($log, "Parse Error: $parseErr\n", FILE_APPEND);
+                    wp_send_json_error(array('message' => $parseErr));
                 }
             } else if ($ext === 'csv') {
+                file_put_contents($log, "Parsing csv...\n", FILE_APPEND);
                 $handle = fopen($file['tmp_name'], "r");
                 if ($handle !== FALSE) {
                     $header = fgetcsv($handle);
@@ -747,8 +770,9 @@ class AIL_Admin
 
             $output = ob_get_clean();
             if (!empty($output)) {
-                // If there was stray output (warnings), we might want to log it or ignore it.
+                file_put_contents($log, "Buffer output: " . $output . "\n", FILE_APPEND);
             }
+            file_put_contents($log, "Sending success JSON\n", FILE_APPEND);
             wp_send_json_success(array(
                 'message' => sprintf('Imported %d keywords successfully. Skipped %d duplicates.', $imported_count, $skipped_count),
                 'imported' => $imported_count,
@@ -756,9 +780,11 @@ class AIL_Admin
             ));
         } catch (Exception $e) {
             ob_end_clean();
+            file_put_contents($log, "Exception: " . $e->getMessage() . "\n", FILE_APPEND);
             wp_send_json_error(array('message' => $e->getMessage()));
         } catch (\Throwable $e) { // Catch PHP 7+ Try/Catch errors like TypeError
             ob_end_clean();
+            file_put_contents($log, "Throwable: " . $e->getMessage() . "\n", FILE_APPEND);
             wp_send_json_error(array('message' => 'System error: ' . $e->getMessage()));
         }
     }
