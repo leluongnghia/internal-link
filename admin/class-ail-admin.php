@@ -309,6 +309,15 @@ class AIL_Admin
         // Temporarily clear the lock just to make sure force run can execute
         delete_transient('ail_batch_processing_lock');
 
+        // --- FORCE MODE: Clear the 7-day skip filter ---
+        // When user manually presses 'Force Run', we must bypass the 7-day protection
+        // by deleting _ail_last_processed meta for all posts so they get re-processed.
+        global $wpdb;
+        $wpdb->delete($wpdb->postmeta, array('meta_key' => '_ail_last_processed'));
+
+        // Re-index the queue so it picks up all posts (since we cleared the meta above)
+        $sweeper->run_batch_index();
+
         // Execute batch process
         $sweeper->run_batch_process();
 
