@@ -85,6 +85,24 @@ function run_ai_internal_linker()
 	}
 	new AIL_Link_Indexer();
 
+	// Initialize Click Tracker
+	if (!class_exists('AIL_Click_Tracker')) {
+		require_once plugin_dir_path(__FILE__) . 'includes/class-ail-click-tracker.php';
+	}
+	new AIL_Click_Tracker();
+
+	// Initialize URL Changer
+	if (!class_exists('AIL_URL_Changer')) {
+		require_once plugin_dir_path(__FILE__) . 'includes/class-ail-url-changer.php';
+	}
+	new AIL_URL_Changer();
+
+	// Initialize GSC Integration
+	if (!class_exists('AIL_GSC')) {
+		require_once plugin_dir_path(__FILE__) . 'includes/class-ail-gsc.php';
+	}
+	new AIL_GSC();
+
 	// Check GitHub Updater Settings
 	$github_url = get_option('ail_github_updater_url', '');
 	$github_token = get_option('ail_github_updater_token', '');

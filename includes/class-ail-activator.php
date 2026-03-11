@@ -85,11 +85,56 @@ class AIL_Activator
             PRIMARY KEY  (post_id)
         ) $charset_collate;";
 
+        $table_click_log = $wpdb->prefix . 'ail_click_log';
+        $sql_click_log = "CREATE TABLE $table_click_log (
+            id mediumint(9) NOT NULL AUTO_INCREMENT,
+            link_url varchar(500) NOT NULL,
+            source_post_id bigint(20) NOT NULL,
+            target_post_id bigint(20) DEFAULT 0,
+            anchor_text varchar(255) NOT NULL,
+            visitor_ip varchar(100) NOT NULL,
+            clicked_at datetime NOT NULL,
+            PRIMARY KEY  (id),
+            KEY source_post_id (source_post_id),
+            KEY clicked_at (clicked_at)
+        ) $charset_collate;";
+
+        $table_gsc_keywords = $wpdb->prefix . 'ail_gsc_keywords';
+        $sql_gsc_keywords = "CREATE TABLE $table_gsc_keywords (
+            id mediumint(9) NOT NULL AUTO_INCREMENT,
+            keyword varchar(500) NOT NULL,
+            page_url varchar(500) NOT NULL,
+            impressions int(11) DEFAULT 0,
+            clicks int(11) DEFAULT 0,
+            ctr float DEFAULT 0,
+            position float DEFAULT 0,
+            data_date date NOT NULL,
+            processed tinyint(1) DEFAULT 0,
+            created_at datetime DEFAULT CURRENT_TIMESTAMP,
+            PRIMARY KEY  (id),
+            KEY keyword (keyword(191)),
+            KEY processed (processed)
+        ) $charset_collate;";
+
+        $table_link_report = $wpdb->prefix . 'ail_link_report';
+        $sql_link_report = "CREATE TABLE $table_link_report (
+            id mediumint(9) NOT NULL AUTO_INCREMENT,
+            post_id bigint(20) NOT NULL,
+            inbound_count int(11) DEFAULT 0,
+            outbound_count int(11) DEFAULT 0,
+            last_scanned datetime DEFAULT CURRENT_TIMESTAMP,
+            PRIMARY KEY  (id),
+            UNIQUE KEY post_id (post_id)
+        ) $charset_collate;";
+
         require_once(ABSPATH . 'wp-admin/includes/upgrade.php');
         dbDelta($sql_logs);
         dbDelta($sql_silos);
         dbDelta($sql_link_stats);
         dbDelta($sql_keywords);
+        dbDelta($sql_click_log);
+        dbDelta($sql_gsc_keywords);
+        dbDelta($sql_link_report);
 
         // Clear old cron
         wp_clear_scheduled_hook('ail_daily_sweep_event');

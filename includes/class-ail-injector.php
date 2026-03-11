@@ -129,6 +129,59 @@ class AIL_Injector
             $this->log_action($post_id, $links_injected);
         }
 
+        $links_budget = $max_links - $links_injected;
+
+        // === PHASE 2: PHP Regex Fallback (chỉ chạy nếu còn budget) ===
+        if ($links_budget > 0) {
+            $manual_rules = get_option('ail_manual_links', []);
+            $modified_content = $this->apply_manual_rules($modified_content, $manual_rules, $links_budget, $post_id);
+        }
+
+        return $modified_content;
+    }
+
+    /**
+     * Apply manual link rules as a fallback if AI budget is not met.
+     */
+    private function apply_manual_rules($content, $rules, $budget, $post_id)
+    {
+        if (empty($rules) || !is_array($rules)) {
+            return $content;
+        }
+
+        $links_injected = 0;
+        $modified_content = $content;
+
+        if (!class_exists('AIL_HTMLParser')) {
+            require_once plugin_dir_path(__FILE__) . 'class-ail-html-parser.php';
+        }
+
+        foreach ($rules as $rule) {
+            if ($links_injected >= $budget) {
+                break;
+            }
+
+            $phrase = isset($rule['phrase']) ? trim($rule['phrase']) : '';
+            $url = isset($rule['url']) ? esc_url_raw($rule['url']) : '';
+
+            if (empty($phrase) || empty($url)) {
+                continue;
+            }
+
+            // Try to replace
+            $new_content = AIL_HTMLParser::replace_phrase($modified_content, $phrase, $url);
+
+            if ($new_content !== $modified_content) {
+                $modified_content = $new_content;
+                $links_injected++;
+                $this->log_anchor_usage($phrase, $url);
+            }
+        }
+
+        if ($links_injected > 0) {
+            $this->log_action($post_id, $links_injected);
+        }
+
         return $modified_content;
     }
 
