@@ -70,6 +70,46 @@ class AIL_Admin
             'ai-internal-links-clusters',
             array($this, 'display_plugin_clusters_page')
         );
+
+        // Add Manual Links Submenu
+        add_submenu_page(
+            'ai-internal-links',
+            'Manual Links',
+            'Manual Links',
+            'manage_options',
+            'ai-internal-links-manual',
+            array($this, 'display_plugin_manual_links_page')
+        );
+
+        // Add Silo Manager Submenu
+        add_submenu_page(
+            'ai-internal-links',
+            'Silo Manager',
+            'Silo Manager',
+            'manage_options',
+            'ai-internal-links-silo',
+            array($this, 'display_plugin_silo_manager_page')
+        );
+
+        // Add GSC Opportunities Submenu
+        add_submenu_page(
+            'ai-internal-links',
+            'GSC Opportunities',
+            'Search Console',
+            'manage_options',
+            'ai-internal-links-gsc',
+            array($this, 'display_plugin_gsc_page')
+        );
+
+        // Add Click Report Submenu
+        add_submenu_page(
+            'ai-internal-links',
+            'Click Stats',
+            'Click Stats',
+            'manage_options',
+            'ai-internal-links-clicks',
+            array($this, 'display_plugin_click_report_page')
+        );
     }
 
     /**
@@ -102,6 +142,38 @@ class AIL_Admin
     public function display_plugin_clusters_page()
     {
         require_once plugin_dir_path(__FILE__) . 'partials/ail-admin-clusters.php';
+    }
+
+    /**
+     * Display manual links page
+     */
+    public function display_plugin_manual_links_page()
+    {
+        require_once plugin_dir_path(__FILE__) . 'partials/ail-admin-manual-links.php';
+    }
+
+    /**
+     * Display silo manager page
+     */
+    public function display_plugin_silo_manager_page()
+    {
+        require_once plugin_dir_path(__FILE__) . 'partials/ail-admin-silo-manager.php';
+    }
+
+    /**
+     * Display GSC opportunities page
+     */
+    public function display_plugin_gsc_page()
+    {
+        require_once plugin_dir_path(__FILE__) . 'partials/ail-admin-gsc.php';
+    }
+
+    /**
+     * Display click stats page
+     */
+    public function display_plugin_click_report_page()
+    {
+        require_once plugin_dir_path(__FILE__) . 'partials/ail-admin-click-report.php';
     }
 
     /**
@@ -144,6 +216,9 @@ class AIL_Admin
         // Legacy (might need migration later, but keeping for now to avoid breaking if referenced)
         register_setting('ail_options_group', 'ail_api_key');
         register_setting('ail_options_group', 'ail_api_model');
+
+        // Manual Linking Options
+        register_setting('ail_options_group', 'ail_manual_links');
     }
 
     /**
