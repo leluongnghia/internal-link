@@ -4,29 +4,33 @@
  * AI Internal Linker – Settings Page
  * Design: Data-Dense Dashboard | Fira Sans | #3B82F6 primary
  */
-if (! defined('ABSPATH')) exit;
+if (!defined('ABSPATH'))
+    exit;
 $provider = get_option('ail_api_provider', 'openai');
 ?>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Fira+Sans:wght@300;400;500;600;700&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
+<link
+    href="https://fonts.googleapis.com/css2?family=Fira+Sans:wght@300;400;500;600;700&family=Fira+Code:wght@400;500&display=swap"
+    rel="stylesheet">
 
 <div id="ail-settings-app" class="ail-s-wrap wrap">
 
     <!-- ── HEADER ──────────────────────────────────────────────────────── -->
     <div class="ail-s-header">
         <div class="ail-s-header__icon">
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                stroke-linecap="round" stroke-linejoin="round">
                 <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" />
                 <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" />
             </svg>
         </div>
         <div>
             <h1 class="ail-s-header__title">AI Internal Linker</h1>
-            <p class="ail-s-header__sub">Configure API engines, link strategy, automation, and system settings</p>
+            <p class="ail-s-header__sub">Cấu hình AI engine, chiến lược liên kết, tự động hóa và hệ thống</p>
         </div>
         <div class="ail-s-header__status">
             <span class="ail-s-dot"></span>
-            System Online &mdash; <strong><?php echo esc_html(strtoupper($provider)); ?></strong> active
+            Hệ thống hoạt động &mdash; <strong><?php echo esc_html(strtoupper($provider)); ?></strong> đang dùng
         </div>
     </div>
 
@@ -39,35 +43,40 @@ $provider = get_option('ail_api_provider', 'openai');
         <!-- ── TABS ──────────────────────────────────────────────────────── -->
         <div class="ail-s-tabs" role="tablist">
             <button type="button" class="ail-s-tab ail-s-tab--active" data-tab="api" role="tab" aria-selected="true">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                    stroke-linecap="round" stroke-linejoin="round">
                     <rect x="2" y="3" width="20" height="14" rx="2" ry="2" />
                     <line x1="8" y1="21" x2="16" y2="21" />
                     <line x1="12" y1="17" x2="12" y2="21" />
                 </svg>
-                API Engines
+                AI Engine
             </button>
             <button type="button" class="ail-s-tab" data-tab="strategy" role="tab" aria-selected="false">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                    stroke-linecap="round" stroke-linejoin="round">
                     <line x1="18" y1="20" x2="18" y2="10" />
                     <line x1="12" y1="20" x2="12" y2="4" />
                     <line x1="6" y1="20" x2="6" y2="14" />
                 </svg>
-                Link Strategy
+                Chiến lược liên kết
             </button>
             <button type="button" class="ail-s-tab" data-tab="automation" role="tab" aria-selected="false">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                    stroke-linecap="round" stroke-linejoin="round">
                     <circle cx="12" cy="12" r="3" />
                     <path d="M19.07 4.93A10 10 0 0 0 4.93 19.07" />
                     <path d="M4.93 4.93A10 10 0 0 1 19.07 19.07" />
                 </svg>
-                Automation
+                Tự động hóa
             </button>
             <button type="button" class="ail-s-tab" data-tab="system" role="tab" aria-selected="false">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                    stroke-linecap="round" stroke-linejoin="round">
                     <circle cx="12" cy="12" r="3" />
-                    <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z" />
+                    <path
+                        d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z" />
                 </svg>
-                System &amp; Updates
+                Hệ thống &amp; Cập nhật
             </button>
         </div>
 
@@ -76,19 +85,23 @@ $provider = get_option('ail_api_provider', 'openai');
 
             <!-- Provider selector -->
             <div class="ail-s-card">
-                <div class="ail-s-card__head">Select AI Engine</div>
+                <div class="ail-s-card__head">Chọn AI Engine</div>
                 <div class="ail-s-providers">
                     <?php
                     $providers = [
-                        'openai' => ['name' => 'OpenAI',        'sub' => 'GPT-4o, GPT-4 Turbo', 'icon' => '<path d="M12 2L2 7l10 5 10-5-10-5M2 17l10 5 10-5M2 12l10 5 10-5"/>'],
+                        'openai' => ['name' => 'OpenAI', 'sub' => 'GPT-4o, GPT-4 Turbo', 'icon' => '<path d="M12 2L2 7l10 5 10-5-10-5M2 17l10 5 10-5M2 12l10 5 10-5"/>'],
                         'gemini' => ['name' => 'Google Gemini', 'sub' => 'Gemini 2.5, 2.0 &amp; 1.5 Series', 'icon' => '<circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>'],
-                        'grok'   => ['name' => 'Grok (xAI)',    'sub' => 'Grok 2, Grok 3, Grok 4.1', 'icon' => '<polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>'],
+                        'grok' => ['name' => 'Grok (xAI)', 'sub' => 'Grok 2, Grok 3, Grok 4.1', 'icon' => '<polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>'],
                     ];
                     foreach ($providers as $key => $p):
-                    ?>
-                        <div class="ail-s-provider <?php echo ($provider === $key) ? 'ail-s-provider--active' : ''; ?>" data-provider="<?php echo esc_attr($key); ?>" role="button" tabindex="0" aria-pressed="<?php echo ($provider === $key) ? 'true' : 'false'; ?>">
+                        ?>
+                        <div class="ail-s-provider <?php echo ($provider === $key) ? 'ail-s-provider--active' : ''; ?>"
+                            data-provider="<?php echo esc_attr($key); ?>" role="button" tabindex="0"
+                            aria-pressed="<?php echo ($provider === $key) ? 'true' : 'false'; ?>">
                             <div class="ail-s-provider__icon">
-                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><?php echo $p['icon']; ?></svg>
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="2" stroke-linecap="round"
+                                    stroke-linejoin="round"><?php echo $p['icon']; ?></svg>
                             </div>
                             <div>
                                 <div class="ail-s-provider__name"><?php echo esc_html($p['name']); ?></div>
@@ -101,57 +114,70 @@ $provider = get_option('ail_api_provider', 'openai');
 
             <!-- OpenAI config -->
             <div class="ail-s-card ail-s-provgroup ail-s-provgroup--openai" <?php echo ($provider !== 'openai') ? 'style="display:none"' : ''; ?>>
-                <div class="ail-s-card__head">OpenAI Configuration</div>
+                <div class="ail-s-card__head">Cấu hình OpenAI</div>
                 <div class="ail-s-fields">
                     <?php $o_model = get_option('ail_openai_model', 'gpt-4o'); ?>
                     <div class="ail-s-field">
-                        <label class="ail-s-label" for="ail_openai_model">Model</label>
+                        <label class="ail-s-label" for="ail_openai_model">Model AI</label>
                         <select name="ail_openai_model" id="ail_openai_model" class="ail-s-select">
-                            <option value="gpt-4o" <?php selected($o_model, 'gpt-4o'); ?>>GPT-4o (Recommended)</option>
+                            <option value="gpt-4o" <?php selected($o_model, 'gpt-4o'); ?>>GPT-4o (Khuyến nghị)</option>
                             <option value="gpt-4-turbo" <?php selected($o_model, 'gpt-4-turbo'); ?>>GPT-4 Turbo</option>
                             <option value="gpt-4o-mini" <?php selected($o_model, 'gpt-4o-mini'); ?>>GPT-4o Mini</option>
                         </select>
                     </div>
                     <div class="ail-s-field">
                         <label class="ail-s-label" for="ail_openai_key">API Key</label>
-                        <input type="password" name="ail_openai_key" id="ail_openai_key" class="ail-s-input" value="<?php echo esc_attr(get_option('ail_openai_key')); ?>" placeholder="sk-..." autocomplete="off">
-                        <p class="ail-s-hint"><a href="https://platform.openai.com/api-keys" target="_blank" rel="noopener">Get your OpenAI API key</a></p>
+                        <input type="password" name="ail_openai_key" id="ail_openai_key" class="ail-s-input"
+                            value="<?php echo esc_attr(get_option('ail_openai_key')); ?>" placeholder="sk-..."
+                            autocomplete="off">
+                        <p class="ail-s-hint"><a href="https://platform.openai.com/api-keys" target="_blank"
+                                rel="noopener">Lấy API key OpenAI tại đây</a></p>
                     </div>
                 </div>
             </div>
 
             <!-- Gemini config -->
             <div class="ail-s-card ail-s-provgroup ail-s-provgroup--gemini" <?php echo ($provider !== 'gemini') ? 'style="display:none"' : ''; ?>>
-                <div class="ail-s-card__head">Gemini Configuration</div>
+                <div class="ail-s-card__head">Cấu hình Gemini</div>
                 <div class="ail-s-fields">
                     <?php $g_model = get_option('ail_gemini_model', 'gemini-2.0-flash'); ?>
                     <div class="ail-s-field">
-                        <label class="ail-s-label" for="ail_gemini_model">Model</label>
+                        <label class="ail-s-label" for="ail_gemini_model">Model AI</label>
                         <select name="ail_gemini_model" id="ail_gemini_model" class="ail-s-select">
-                            <option value="gemini-2.5-flash" <?php selected($g_model, 'gemini-2.5-flash'); ?>>Gemini 2.5 Flash</option>
-                            <option value="gemini-2.0-flash" <?php selected($g_model, 'gemini-2.0-flash'); ?>>Gemini 2.0 Flash</option>
-                            <option value="gemini-2.0-flash-lite" <?php selected($g_model, 'gemini-2.0-flash-lite'); ?>>Gemini 2.0 Flash-Lite</option>
-                            <option value="gemini-2.0-pro-exp" <?php selected($g_model, 'gemini-2.0-pro-exp'); ?>>Gemini 2.0 Pro Experimental</option>
-                            <option value="gemini-1.5-pro" <?php selected($g_model, 'gemini-1.5-pro'); ?>>Gemini 1.5 Pro</option>
-                            <option value="gemini-1.5-flash" <?php selected($g_model, 'gemini-1.5-flash'); ?>>Gemini 1.5 Flash</option>
-                            <option value="gemini-1.5-flash-8b" <?php selected($g_model, 'gemini-1.5-flash-8b'); ?>>Gemini 1.5 Flash-8B</option>
+                            <option value="gemini-2.5-flash" <?php selected($g_model, 'gemini-2.5-flash'); ?>>Gemini 2.5
+                                Flash</option>
+                            <option value="gemini-2.0-flash" <?php selected($g_model, 'gemini-2.0-flash'); ?>>Gemini 2.0
+                                Flash</option>
+                            <option value="gemini-2.0-flash-lite" <?php selected($g_model, 'gemini-2.0-flash-lite'); ?>>
+                                Gemini 2.0 Flash-Lite</option>
+                            <option value="gemini-2.0-pro-exp" <?php selected($g_model, 'gemini-2.0-pro-exp'); ?>>Gemini
+                                2.0 Pro Experimental</option>
+                            <option value="gemini-1.5-pro" <?php selected($g_model, 'gemini-1.5-pro'); ?>>Gemini 1.5 Pro
+                            </option>
+                            <option value="gemini-1.5-flash" <?php selected($g_model, 'gemini-1.5-flash'); ?>>Gemini 1.5
+                                Flash</option>
+                            <option value="gemini-1.5-flash-8b" <?php selected($g_model, 'gemini-1.5-flash-8b'); ?>>
+                                Gemini 1.5 Flash-8B</option>
                         </select>
                     </div>
                     <div class="ail-s-field">
                         <label class="ail-s-label" for="ail_gemini_key">API Key</label>
-                        <input type="password" name="ail_gemini_key" id="ail_gemini_key" class="ail-s-input" value="<?php echo esc_attr(get_option('ail_gemini_key')); ?>" placeholder="AIzaSy..." autocomplete="off">
-                        <p class="ail-s-hint"><a href="https://aistudio.google.com/app/apikey" target="_blank" rel="noopener">Get your Gemini API key</a></p>
+                        <input type="password" name="ail_gemini_key" id="ail_gemini_key" class="ail-s-input"
+                            value="<?php echo esc_attr(get_option('ail_gemini_key')); ?>" placeholder="AIzaSy..."
+                            autocomplete="off">
+                        <p class="ail-s-hint"><a href="https://aistudio.google.com/app/apikey" target="_blank"
+                                rel="noopener">Lấy API key Gemini tại đây</a></p>
                     </div>
                 </div>
             </div>
 
             <!-- Grok config -->
             <div class="ail-s-card ail-s-provgroup ail-s-provgroup--grok" <?php echo ($provider !== 'grok') ? 'style="display:none"' : ''; ?>>
-                <div class="ail-s-card__head">Grok Configuration</div>
+                <div class="ail-s-card__head">Cấu hình Grok</div>
                 <div class="ail-s-fields">
                     <?php $x_model = get_option('ail_grok_model', 'grok-2-1212'); ?>
                     <div class="ail-s-field">
-                        <label class="ail-s-label" for="ail_grok_model">Model</label>
+                        <label class="ail-s-label" for="ail_grok_model">Model AI</label>
                         <select name="ail_grok_model" id="ail_grok_model" class="ail-s-select">
                             <option value="grok-2-1212" <?php selected($x_model, 'grok-2-1212'); ?>>Grok 2</option>
                             <option value="grok-3" <?php selected($x_model, 'grok-3'); ?>>Grok 3</option>
@@ -160,8 +186,11 @@ $provider = get_option('ail_api_provider', 'openai');
                     </div>
                     <div class="ail-s-field">
                         <label class="ail-s-label" for="ail_grok_key">API Key</label>
-                        <input type="password" name="ail_grok_key" id="ail_grok_key" class="ail-s-input" value="<?php echo esc_attr(get_option('ail_grok_key')); ?>" placeholder="xai-..." autocomplete="off">
-                        <p class="ail-s-hint"><a href="https://docs.x.ai/developers/quickstart" target="_blank" rel="noopener">Get your Grok API key</a></p>
+                        <input type="password" name="ail_grok_key" id="ail_grok_key" class="ail-s-input"
+                            value="<?php echo esc_attr(get_option('ail_grok_key')); ?>" placeholder="xai-..."
+                            autocomplete="off">
+                        <p class="ail-s-hint"><a href="https://docs.x.ai/developers/quickstart" target="_blank"
+                                rel="noopener">Lấy API key Grok tại đây</a></p>
                     </div>
                 </div>
             </div>
@@ -170,52 +199,58 @@ $provider = get_option('ail_api_provider', 'openai');
         <!-- ── TAB: LINK STRATEGY ─────────────────────────────────────────── -->
         <div class="ail-s-pane" id="ail-pane-strategy" style="display:none">
             <div class="ail-s-card">
-                <div class="ail-s-card__head">Content Filtering</div>
+                <div class="ail-s-card__head">Lọc nội dung & nguồn link</div>
                 <div class="ail-s-fields">
                     <div class="ail-s-field">
-                        <label class="ail-s-label" for="ail_link_source">Link Source Strategy</label>
+                        <label class="ail-s-label" for="ail_link_source">Chiến lược nguồn link</label>
                         <select name="ail_link_source" id="ail_link_source" class="ail-s-select">
-                            <option value="category" <?php selected(get_option('ail_link_source'), 'category'); ?>>Same Category (Recommended)</option>
-                            <option value="tag" <?php selected(get_option('ail_link_source'), 'tag'); ?>>Same Tag</option>
-                            <option value="silo" <?php selected(get_option('ail_link_source'), 'silo'); ?>>Content Silo (Pillar &amp; Cluster)</option>
-                            <option value="all" <?php selected(get_option('ail_link_source'), 'all'); ?>>All Content (Slow)</option>
+                            <option value="category" <?php selected(get_option('ail_link_source'), 'category'); ?>>Cùng
+                                Danh mục (Khuyến nghị)</option>
+                            <option value="tag" <?php selected(get_option('ail_link_source'), 'tag'); ?>>Cùng Thẻ tag
+                            </option>
+                            <option value="silo" <?php selected(get_option('ail_link_source'), 'silo'); ?>>Content Silo
+                                (Pillar &amp; Cluster)</option>
+                            <option value="all" <?php selected(get_option('ail_link_source'), 'all'); ?>>Toàn bộ nội
+                                dung (Chậm hơn)</option>
                         </select>
-                        <p class="ail-s-hint">Where should the AI look for internal link candidates?</p>
+                        <p class="ail-s-hint">AI sẽ tìm kiếm bài viết để đặt internal link ở phạm vi nào?</p>
                     </div>
 
                     <div class="ail-s-field">
-                        <label class="ail-s-label">Optimization Skills</label>
+                        <label class="ail-s-label">Optimization Skills (tập viết tùy chỉnh)</label>
                         <div class="ail-s-skills-box">
                             <label class="ail-s-skills-all">
-                                <input type="checkbox" id="ail_skill_select_all"> <span>Select All Skills</span>
+                                <input type="checkbox" id="ail_skill_select_all"> <span>Chọn tất cả Skills</span>
                             </label>
                             <hr class="ail-s-divider">
                             <?php
-                            $upload_dir    = wp_upload_dir();
-                            $skills_dir    = trailingslashit($upload_dir['basedir']) . 'aprg-skills/';
-                            $all_skills    = [];
-                            $has_skills    = false;
+                            $upload_dir = wp_upload_dir();
+                            $skills_dir = trailingslashit($upload_dir['basedir']) . 'aprg-skills/';
+                            $all_skills = [];
+                            $has_skills = false;
                             if (file_exists($skills_dir)) {
                                 $files = glob($skills_dir . '*.md');
                                 if ($files) {
                                     $has_skills = true;
-                                    foreach ($files as $f) $all_skills[] = basename($f, '.md');
+                                    foreach ($files as $f)
+                                        $all_skills[] = basename($f, '.md');
                                 }
                             }
-                            $saved_skills    = get_option('ail_selected_skill');
+                            $saved_skills = get_option('ail_selected_skill');
                             $selected_skills = ($saved_skills === false) ? $all_skills : (is_array($saved_skills) ? $saved_skills : []);
                             if ($has_skills):
-                            ?>
+                                ?>
                                 <div class="ail-s-skills-grid">
                                     <?php foreach ($all_skills as $sk): ?>
                                         <label class="ail-s-skill-item">
-                                            <input type="checkbox" name="ail_selected_skill[]" value="<?php echo esc_attr($sk); ?>" class="ail-skill-checkbox" <?php echo in_array($sk, $selected_skills) ? 'checked' : ''; ?>>
+                                            <input type="checkbox" name="ail_selected_skill[]"
+                                                value="<?php echo esc_attr($sk); ?>" class="ail-skill-checkbox" <?php echo in_array($sk, $selected_skills) ? 'checked' : ''; ?>>
                                             <span><?php echo esc_html($sk); ?></span>
                                         </label>
                                     <?php endforeach; ?>
                                 </div>
                             <?php else: ?>
-                                <p class="ail-s-hint">No skills found in <code>/aprg-skills/</code></p>
+                                <p class="ail-s-hint">Chưa có skill nào trong <code>/aprg-skills/</code></p>
                             <?php endif; ?>
                         </div>
                     </div>
@@ -223,17 +258,20 @@ $provider = get_option('ail_api_provider', 'openai');
             </div>
 
             <div class="ail-s-card">
-                <div class="ail-s-card__head">Injection Limits</div>
+                <div class="ail-s-card__head">Giới hạn chèn link</div>
                 <div class="ail-s-fields ail-s-fields--row">
                     <div class="ail-s-field">
-                        <label class="ail-s-label" for="ail_max_links">Max Links per Post</label>
-                        <input type="number" name="ail_max_links" id="ail_max_links" class="ail-s-input ail-s-input--sm" value="<?php echo esc_attr(get_option('ail_max_links', 5)); ?>" min="1" max="50">
-                        <p class="ail-s-hint">Maximum internal links injected per run</p>
+                        <label class="ail-s-label" for="ail_max_links">Số link tối đa / bài</label>
+                        <input type="number" name="ail_max_links" id="ail_max_links" class="ail-s-input ail-s-input--sm"
+                            value="<?php echo esc_attr(get_option('ail_max_links', 5)); ?>" min="1" max="50">
+                        <p class="ail-s-hint">Số internal link tối đa được chèn vào mỗi lần chạy</p>
                     </div>
                     <div class="ail-s-field">
-                        <label class="ail-s-label" for="ail_max_anchor_repeat">Max Anchor Repeat</label>
-                        <input type="number" name="ail_max_anchor_repeat" id="ail_max_anchor_repeat" class="ail-s-input ail-s-input--sm" value="<?php echo esc_attr(get_option('ail_max_anchor_repeat', 3)); ?>" min="1" max="100">
-                        <p class="ail-s-hint">Limit reusing the exact same anchor text per URL</p>
+                        <label class="ail-s-label" for="ail_max_anchor_repeat">Lặp anchor tối đa</label>
+                        <input type="number" name="ail_max_anchor_repeat" id="ail_max_anchor_repeat"
+                            class="ail-s-input ail-s-input--sm"
+                            value="<?php echo esc_attr(get_option('ail_max_anchor_repeat', 3)); ?>" min="1" max="100">
+                        <p class="ail-s-hint">Giới hạn số lần dùng cùng một anchor text cho mỗi URL</p>
                     </div>
                 </div>
             </div>
@@ -242,12 +280,12 @@ $provider = get_option('ail_api_provider', 'openai');
         <!-- ── TAB: AUTOMATION ───────────────────────────────────────────── -->
         <div class="ail-s-pane" id="ail-pane-automation" style="display:none">
             <div class="ail-s-card">
-                <div class="ail-s-card__head">Trigger Events</div>
+                <div class="ail-s-card__head">Sự kiện kích hoạt</div>
                 <div class="ail-s-fields">
                     <div class="ail-s-field ail-s-field--toggle">
                         <div>
-                            <div class="ail-s-label">Auto-Link on Save</div>
-                            <p class="ail-s-hint">Automatically inject links when saving or publishing a post</p>
+                            <div class="ail-s-label">Tự động chèn link khi lưu bài</div>
+                            <p class="ail-s-hint">Tự động chèn internal link khi lưu hoặc xuất bản bài viết</p>
                         </div>
                         <label class="ail-toggle" aria-label="Auto-Link on Save">
                             <input type="hidden" name="ail_auto_on_save" value="0">
@@ -257,8 +295,8 @@ $provider = get_option('ail_api_provider', 'openai');
                     </div>
                     <div class="ail-s-field ail-s-field--toggle">
                         <div>
-                            <div class="ail-s-label">Background Processing</div>
-                            <p class="ail-s-hint">Run asynchronously — recommended ON for large sites</p>
+                            <div class="ail-s-label">Xử lý nền (Background)</div>
+                            <p class="ail-s-hint">Chạy bất đồng bộ — nên bật với website có nhiều bài viết</p>
                         </div>
                         <label class="ail-toggle" aria-label="Background Processing">
                             <input type="hidden" name="ail_background_mode" value="0">
@@ -270,12 +308,12 @@ $provider = get_option('ail_api_provider', 'openai');
             </div>
 
             <div class="ail-s-card">
-                <div class="ail-s-card__head">Batch Processing (Cron)</div>
+                <div class="ail-s-card__head">Xử lý hàng loạt (Cron tự động)</div>
                 <div class="ail-s-fields">
                     <div class="ail-s-field ail-s-field--toggle">
                         <div>
-                            <div class="ail-s-label">Enable Daily Cron</div>
-                            <p class="ail-s-hint">Activate the automatic background scanner for older posts</p>
+                            <div class="ail-s-label">Bật Cron hàng ngày</div>
+                            <p class="ail-s-hint">Kích hoạt quét tự động nền để xử lý các bài viết cũ</p>
                         </div>
                         <label class="ail-toggle" aria-label="Enable Daily Cron">
                             <input type="hidden" name="ail_batch_enabled" value="0">
@@ -290,33 +328,39 @@ $provider = get_option('ail_api_provider', 'openai');
         <!-- ── TAB: SYSTEM & UPDATES ─────────────────────────────────────── -->
         <div class="ail-s-pane" id="ail-pane-system" style="display:none">
             <div class="ail-s-card">
-                <div class="ail-s-card__head">GitHub Auto Updater</div>
+                <div class="ail-s-card__head">Tự động cập nhật qua GitHub</div>
                 <div class="ail-s-fields">
                     <div class="ail-s-field">
-                        <label class="ail-s-label" for="ail_github_updater_url">Repository URL</label>
-                        <input type="url" name="ail_github_updater_url" id="ail_github_updater_url" class="ail-s-input" value="<?php echo esc_attr(get_option('ail_github_updater_url')); ?>" placeholder="https://github.com/leluongnghia/internal-link">
-                        <p class="ail-s-hint">Full URL to GitHub repository for automatic updates</p>
+                        <label class="ail-s-label" for="ail_github_updater_url">URL Repository GitHub</label>
+                        <input type="url" name="ail_github_updater_url" id="ail_github_updater_url" class="ail-s-input"
+                            value="<?php echo esc_attr(get_option('ail_github_updater_url')); ?>"
+                            placeholder="https://github.com/leluongnghia/internal-link">
+                        <p class="ail-s-hint">Đường dẫn đầy đủ tới repository GitHub để tự động cập nhật</p>
                     </div>
                     <div class="ail-s-field">
-                        <label class="ail-s-label" for="ail_github_updater_token">GitHub Token <span class="ail-s-optional">(Optional)</span></label>
-                        <input type="password" name="ail_github_updater_token" id="ail_github_updater_token" class="ail-s-input" value="<?php echo esc_attr(get_option('ail_github_updater_token')); ?>" placeholder="ghp_..." autocomplete="off">
-                        <p class="ail-s-hint">Required for private repositories or to bypass rate limits</p>
+                        <label class="ail-s-label" for="ail_github_updater_token">GitHub Token <span
+                                class="ail-s-optional">(Tùy chọn)</span></label>
+                        <input type="password" name="ail_github_updater_token" id="ail_github_updater_token"
+                            class="ail-s-input" value="<?php echo esc_attr(get_option('ail_github_updater_token')); ?>"
+                            placeholder="ghp_..." autocomplete="off">
+                        <p class="ail-s-hint">Bắt buộc nếu dùng repository riêng tư hoặc muốn bỏ qua giới hạn rate limit
+                        </p>
                     </div>
                 </div>
             </div>
 
             <div class="ail-s-card">
-                <div class="ail-s-card__head">Current Status</div>
+                <div class="ail-s-card__head">Trạng thái hiện tại</div>
                 <div class="ail-s-fields">
                     <div class="ail-s-stat-row">
-                        <span class="ail-s-stat-label">Plugin Version</span>
+                        <span class="ail-s-stat-label">Phiên bản Plugin</span>
                         <span class="ail-s-stat-val"><code><?php echo esc_html(AIL_VERSION); ?></code></span>
                     </div>
                     <div class="ail-s-stat-row">
                         <span class="ail-s-stat-label">Repository</span>
                         <span class="ail-s-stat-val">
                             <?php $repo = get_option('ail_github_updater_url', '');
-                            echo $repo ? '<a href="' . esc_url($repo) . '" target="_blank" rel="noopener">' . esc_html($repo) . '</a>' : '<em style="color:#94a3b8">Not configured</em>'; ?>
+                            echo $repo ? '<a href="' . esc_url($repo) . '" target="_blank" rel="noopener">' . esc_html($repo) . '</a>' : '<em style="color:#94a3b8">Chưa cấu hình</em>'; ?>
                         </span>
                     </div>
                     <div class="ail-s-stat-row">
@@ -324,30 +368,37 @@ $provider = get_option('ail_api_provider', 'openai');
                         <span class="ail-s-stat-val">
                             <?php $tok = get_option('ail_github_updater_token', '');
                             if ($tok): ?>
-                                <span style="color:#16a34a;display:inline-flex;align-items:center;gap:5px"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                <span style="color:#16a34a;display:inline-flex;align-items:center;gap:5px"><svg width="13"
+                                        height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+                                        stroke-linecap="round" stroke-linejoin="round">
                                         <polyline points="20 6 9 17 4 12" />
-                                    </svg>Configured (<?php echo esc_html(substr($tok, 0, 8)); ?>...)</span>
+                                    </svg>Đã cấu hình (<?php echo esc_html(substr($tok, 0, 8)); ?>...)</span>
                             <?php else: ?>
-                                <span style="color:#94a3b8;display:inline-flex;align-items:center;gap:5px"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                <span style="color:#94a3b8;display:inline-flex;align-items:center;gap:5px"><svg width="13"
+                                        height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+                                        stroke-linecap="round" stroke-linejoin="round">
                                         <line x1="18" y1="6" x2="6" y2="18" />
                                         <line x1="6" y1="6" x2="18" y2="18" />
-                                    </svg>Not set (only needed for private repositories)</span>
+                                    </svg>Chưa đặt (chỉ cần với repo riêng tư)</span>
                             <?php endif; ?>
                         </span>
                     </div>
                     <div class="ail-s-stat-row">
-                        <span class="ail-s-stat-label">Check for Updates</span>
+                        <span class="ail-s-stat-label">Kiểm tra cập nhật</span>
                         <span class="ail-s-stat-val" style="display:flex;flex-wrap:wrap;align-items:center;gap:12px">
                             <button type="button" id="ail-force-update-btn" class="ail-s-btn ail-s-btn--secondary">
-                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
                                     <polyline points="23 4 23 10 17 10" />
                                     <polyline points="1 20 1 14 7 14" />
                                     <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15" />
                                 </svg>
-                                Check for Updates
+                                Kiểm tra cập nhật
                             </button>
                             <span id="ail-check-spinner" style="display:none;color:#64748b;font-size:13px">
-                                <svg class="ail-spin" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                <svg class="ail-spin" width="14" height="14" viewBox="0 0 24 24" fill="none"
+                                    stroke="currentColor" stroke-width="2.5" stroke-linecap="round"
+                                    stroke-linejoin="round" aria-hidden="true">
                                     <line x1="12" y1="2" x2="12" y2="6" />
                                     <line x1="12" y1="18" x2="12" y2="22" />
                                     <line x1="4.93" y1="4.93" x2="7.76" y2="7.76" />
@@ -357,7 +408,7 @@ $provider = get_option('ail_api_provider', 'openai');
                                     <line x1="4.93" y1="19.07" x2="7.76" y2="16.24" />
                                     <line x1="16.24" y1="7.76" x2="19.07" y2="4.93" />
                                 </svg>
-                                Checking GitHub&hellip;
+                                Đang kiểm tra GitHub&hellip;
                             </span>
                         </span>
                     </div>
@@ -369,29 +420,30 @@ $provider = get_option('ail_api_provider', 'openai');
         <!-- ── SAVE BAR ───────────────────────────────────────────────────── -->
         <div class="ail-s-save-bar">
             <button type="submit" class="ail-s-btn ail-s-btn--primary" name="submit" id="submit">
-                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+                    stroke-linecap="round" stroke-linejoin="round">
                     <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z" />
                     <polyline points="17 21 17 13 7 13 7 21" />
                     <polyline points="7 3 7 8 15 8" />
                 </svg>
-                Save Configuration
+                Lưu cài đặt
             </button>
         </div>
     </form>
 </div><!-- #ail-settings-app -->
 
 <script>
-    (function() {
+    (function () {
         // ── Tabs ──────────────────────────────────────────────────────────────
-        document.querySelectorAll('.ail-s-tab').forEach(function(tab) {
-            tab.addEventListener('click', function() {
-                document.querySelectorAll('.ail-s-tab').forEach(function(t) {
+        document.querySelectorAll('.ail-s-tab').forEach(function (tab) {
+            tab.addEventListener('click', function () {
+                document.querySelectorAll('.ail-s-tab').forEach(function (t) {
                     t.classList.remove('ail-s-tab--active');
                     t.setAttribute('aria-selected', 'false');
                 });
                 tab.classList.add('ail-s-tab--active');
                 tab.setAttribute('aria-selected', 'true');
-                document.querySelectorAll('.ail-s-pane').forEach(function(p) {
+                document.querySelectorAll('.ail-s-pane').forEach(function (p) {
                     p.style.display = 'none';
                 });
                 document.getElementById('ail-pane-' + tab.dataset.tab).style.display = '';
@@ -399,24 +451,24 @@ $provider = get_option('ail_api_provider', 'openai');
         });
 
         // ── Provider cards ────────────────────────────────────────────────────
-        document.querySelectorAll('.ail-s-provider').forEach(function(card) {
+        document.querySelectorAll('.ail-s-provider').forEach(function (card) {
             function select() {
                 var prov = card.dataset.provider;
                 document.getElementById('ail_api_provider').value = prov;
-                document.querySelectorAll('.ail-s-provider').forEach(function(c) {
+                document.querySelectorAll('.ail-s-provider').forEach(function (c) {
                     c.classList.remove('ail-s-provider--active');
                     c.setAttribute('aria-pressed', 'false');
                 });
                 card.classList.add('ail-s-provider--active');
                 card.setAttribute('aria-pressed', 'true');
-                document.querySelectorAll('.ail-s-provgroup').forEach(function(g) {
+                document.querySelectorAll('.ail-s-provgroup').forEach(function (g) {
                     g.style.display = 'none';
                 });
                 var target = document.querySelector('.ail-s-provgroup--' + prov);
                 if (target) target.style.display = '';
             }
             card.addEventListener('click', select);
-            card.addEventListener('keydown', function(e) {
+            card.addEventListener('keydown', function (e) {
                 if (e.key === ' ' || e.key === 'Enter') {
                     e.preventDefault();
                     select();
@@ -427,15 +479,15 @@ $provider = get_option('ail_api_provider', 'openai');
         // ── Select All Skills ─────────────────────────────────────────────────
         var selectAll = document.getElementById('ail_skill_select_all');
         if (selectAll) {
-            selectAll.addEventListener('change', function() {
-                document.querySelectorAll('.ail-skill-checkbox').forEach(function(cb) {
+            selectAll.addEventListener('change', function () {
+                document.querySelectorAll('.ail-skill-checkbox').forEach(function (cb) {
                     cb.checked = selectAll.checked;
                 });
             });
         }
 
         // ── Force Update Check ────────────────────────────────────────────────
-        document.getElementById('ail-force-update-btn').addEventListener('click', function() {
+        document.getElementById('ail-force-update-btn').addEventListener('click', function () {
             var btn = this,
                 spinner = document.getElementById('ail-check-spinner'),
                 result = document.getElementById('ail-update-result');
@@ -446,14 +498,14 @@ $provider = get_option('ail_api_provider', 'openai');
             fd.append('action', 'ail_force_update_check');
             fd.append('nonce', '<?php echo wp_create_nonce('ail_force_update'); ?>');
             fetch('<?php echo admin_url('admin-ajax.php'); ?>', {
-                    method: 'POST',
-                    body: fd,
-                    credentials: 'same-origin'
-                })
-                .then(function(r) {
+                method: 'POST',
+                body: fd,
+                credentials: 'same-origin'
+            })
+                .then(function (r) {
                     return r.json();
                 })
-                .then(function(resp) {
+                .then(function (resp) {
                     spinner.style.display = 'none';
                     btn.disabled = false;
                     if (resp.success) {
@@ -461,9 +513,9 @@ $provider = get_option('ail_api_provider', 'openai');
                             color = d.has_update ? '#ef4444' : '#16a34a';
                         var html = '<div class="ail-s-update-box" style="border-left-color:' + color + '">' +
                             '<strong>' + d.message + '</strong><br>' +
-                            'Installed: <code>' + d.current_version + '</code> &nbsp;|&nbsp; Latest: <code>' + d.latest_version + '</code><br>' +
-                            'Released: ' + d.published_at;
-                        if (d.has_update) html += '<br><a href="<?php echo admin_url('plugins.php'); ?>" class="ail-s-btn ail-s-btn--primary" style="margin-top:10px">Go to Plugins to Update</a>';
+                            'Đã cài: <code>' + d.current_version + '</code> &nbsp;|&nbsp; Mới nhất: <code>' + d.latest_version + '</code><br>' +
+                            'Ngày phát hành: ' + d.published_at;
+                        if (d.has_update) html += '<br><a href="<?php echo admin_url('plugins.php'); ?>" class="ail-s-btn ail-s-btn--primary" style="margin-top:10px">Vào Plugins để cập nhật</a>';
                         html += '</div>';
                         result.innerHTML = html;
                     } else {
@@ -471,7 +523,7 @@ $provider = get_option('ail_api_provider', 'openai');
                         result.innerHTML = '<div class="ail-s-update-box" style="border-left-color:#ef4444">' + msg + '</div>';
                     }
                 })
-                .catch(function(err) {
+                .catch(function (err) {
                     spinner.style.display = 'none';
                     btn.disabled = false;
                     result.innerHTML = '<div class="ail-s-update-box" style="border-left-color:#ef4444">Connection error: ' + err + '</div>';
