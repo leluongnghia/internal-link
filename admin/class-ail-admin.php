@@ -215,7 +215,7 @@ class AIL_Admin
     public function render_interactive_scanner_meta_box($post)
     {
         $nonce = wp_create_nonce('ail_interactive_scan_' . $post->ID);
-?>
+        ?>
         <div class="ail-scanner-container">
             <p>Scan your content to get real-time internal link suggestions from AI.</p>
             <button type="button" class="button button-primary ail-scan-btn" data-id="<?php echo esc_attr($post->ID); ?>"
@@ -241,7 +241,7 @@ class AIL_Admin
                 font-weight: bold;
             }
         </style>
-<?php
+        <?php
     }
 
     /**
@@ -564,20 +564,20 @@ class AIL_Admin
         }
 
         $clusterer = new AIL_Keyword_Clusterer();
-        $result    = $clusterer->run();
+        $result = $clusterer->run();
 
         if ($result['total'] === 0) {
             wp_send_json_error(array('message' => 'No keywords found. Please import keywords first.'));
         }
 
         wp_send_json_success(array(
-            'message'       => sprintf(
+            'message' => sprintf(
                 '✅ Clustering complete! Found <strong>%d clusters</strong> from %d keywords.',
                 $result['cluster_count'],
                 $result['total']
             ),
             'cluster_count' => $result['cluster_count'],
-            'total'         => $result['total'],
+            'total' => $result['total'],
         ));
     }
 
@@ -610,7 +610,7 @@ class AIL_Admin
             require_once plugin_dir_path(dirname(__FILE__)) . 'includes/class-ail-keyword-clusterer.php';
         }
 
-        $map  = AIL_Keyword_Clusterer::get_cluster_post_map();
+        $map = AIL_Keyword_Clusterer::get_cluster_post_map();
         $gaps = AIL_Keyword_Clusterer::get_content_gaps();
 
         // Serialize for JSON (WP_Post objects are not serializable cleanly)
@@ -619,25 +619,25 @@ class AIL_Admin
             $post_data = null;
             if ($data['post']) {
                 $post_data = [
-                    'ID'          => $data['post']->ID,
-                    'title'       => $data['post']->post_title,
-                    'url'         => get_permalink($data['post']->ID),
-                    'edit_url'    => get_edit_post_link($data['post']->ID, 'raw'),
+                    'ID' => $data['post']->ID,
+                    'title' => $data['post']->post_title,
+                    'url' => get_permalink($data['post']->ID),
+                    'edit_url' => get_edit_post_link($data['post']->ID, 'raw'),
                 ];
             }
             $map_clean[$name] = [
-                'name'    => $name,
-                'pillar'  => $data['pillar'],
-                'spokes'  => $data['spokes'],
-                'volume'  => $data['volume'],
-                'intent'  => $data['intent'],
-                'post'    => $post_data,
+                'name' => $name,
+                'pillar' => $data['pillar'],
+                'spokes' => $data['spokes'],
+                'volume' => $data['volume'],
+                'intent' => $data['intent'],
+                'post' => $post_data,
             ];
         }
 
         wp_send_json_success(array(
             'clusters' => array_values($map_clean),
-            'gaps'     => $gaps,
+            'gaps' => $gaps,
         ));
     }
 
@@ -666,6 +666,9 @@ class AIL_Admin
         global $wpdb;
         $table_keywords = $wpdb->prefix . 'ail_keywords';
 
+        ob_start(); // Prevent PHP warnings from corrupting the JSON response
+        @set_time_limit(0);
+
         try {
             $imported_count = 0;
             $skipped_count = 0;
@@ -673,15 +676,21 @@ class AIL_Admin
             if ($ext === 'xlsx') {
                 if ($xlsx = \Shuchkin\SimpleXLSX::parse($file['tmp_name'])) {
                     $rows = $xlsx->rows();
+                    if (!$rows || !is_array($rows)) {
+                        ob_end_clean();
+                        wp_send_json_error(array('message' => 'The uploaded Excel file has no data or is in an unsupported format.'));
+                        return;
+                    }
                     $header = array_shift($rows);
 
                     foreach ($rows as $row) {
                         $keyword = isset($row[0]) ? sanitize_text_field($row[0]) : '';
-                        $intent  = isset($row[1]) ? sanitize_text_field($row[1]) : '';
-                        $volume  = isset($row[2]) ? intval(str_replace(',', '', $row[2])) : 0;
-                        $kd      = isset($row[3]) ? floatval($row[3]) : 0.0;
+                        $intent = isset($row[1]) ? sanitize_text_field($row[1]) : '';
+                        $volume = isset($row[2]) ? intval(str_replace(',', '', $row[2])) : 0;
+                        $kd = isset($row[3]) ? floatval($row[3]) : 0.0;
 
-                        if (empty($keyword)) continue;
+                        if (empty($keyword))
+                            continue;
 
                         $inserted = $wpdb->insert(
                             $table_keywords,
@@ -709,11 +718,12 @@ class AIL_Admin
                     $header = fgetcsv($handle);
                     while (($data = fgetcsv($handle)) !== FALSE) {
                         $keyword = isset($data[0]) ? sanitize_text_field($data[0]) : '';
-                        $intent  = isset($data[1]) ? sanitize_text_field($data[1]) : '';
-                        $volume  = isset($data[2]) ? intval(str_replace(',', '', $data[2])) : 0;
-                        $kd      = isset($data[3]) ? floatval($data[3]) : 0.0;
+                        $intent = isset($data[1]) ? sanitize_text_field($data[1]) : '';
+                        $volume = isset($data[2]) ? intval(str_replace(',', '', $data[2])) : 0;
+                        $kd = isset($data[3]) ? floatval($data[3]) : 0.0;
 
-                        if (empty($keyword)) continue;
+                        if (empty($keyword))
+                            continue;
 
                         $inserted = $wpdb->insert(
                             $table_keywords,
@@ -735,13 +745,21 @@ class AIL_Admin
                 }
             }
 
+            $output = ob_get_clean();
+            if (!empty($output)) {
+                // If there was stray output (warnings), we might want to log it or ignore it.
+            }
             wp_send_json_success(array(
                 'message' => sprintf('Imported %d keywords successfully. Skipped %d duplicates.', $imported_count, $skipped_count),
                 'imported' => $imported_count,
                 'duplicates' => $skipped_count
             ));
         } catch (Exception $e) {
+            ob_end_clean();
             wp_send_json_error(array('message' => $e->getMessage()));
+        } catch (\Throwable $e) { // Catch PHP 7+ Try/Catch errors like TypeError
+            ob_end_clean();
+            wp_send_json_error(array('message' => 'System error: ' . $e->getMessage()));
         }
     }
 }
