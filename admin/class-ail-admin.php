@@ -309,16 +309,22 @@ class AIL_Admin
         // Temporarily clear the lock just to make sure force run can execute
         delete_transient('ail_batch_processing_lock');
 
-        // --- FORCE MODE: Clear the 7-day skip filter ---
-        // When user manually presses 'Force Run', we must bypass the 7-day protection
-        // by deleting _ail_last_processed meta for all posts so they get re-processed.
-        global $wpdb;
-        $wpdb->delete($wpdb->postmeta, array('meta_key' => '_ail_last_processed'));
+        // --- FORCE MODE: Only reset & re-index on the VERY FIRST call of this session ---
+        // BUG FIX: Previously this ran on EVERY AJAX call, which reset the queue each time
+        // causing the progress to stay stuck at post 1 forever.
+        // Now we use a transient flag. When flag is absent = first call = reset + re-index.
+        // When flag exists = subsequent call = just process the next batch chunk.
+        if (!get_transient('ail_force_run_initialized')) {
+            global $wpdb;
+            // Clear the 7-day skip filter so all posts get re-processed
+            $wpdb->delete($wpdb->postmeta, array('meta_key' => '_ail_last_processed'));
+            // Re-index: build a fresh queue of all published posts
+            $sweeper->run_batch_index();
+            // Mark as initialized for the next 2 hours (covers a full batch run)
+            set_transient('ail_force_run_initialized', true, 2 * HOUR_IN_SECONDS);
+        }
 
-        // Re-index the queue so it picks up all posts (since we cleared the meta above)
-        $sweeper->run_batch_index();
-
-        // Execute batch process
+        // Execute one batch chunk (default 10 posts per call)
         $sweeper->run_batch_process();
 
         $queue_json = get_option('ail_batch_queue', '[]');
@@ -326,6 +332,11 @@ class AIL_Admin
         $total = is_array($queue) ? count($queue) : 0;
         $pointer = (int) get_option('ail_batch_queue_pointer', 0);
         $finished = ($pointer >= $total && $total > 0);
+
+        // Clear the init flag when batch is complete so next "Run All" starts fresh
+        if ($finished) {
+            delete_transient('ail_force_run_initialized');
+        }
 
         wp_send_json_success(array(
             'message' => 'Batch step completed.',
