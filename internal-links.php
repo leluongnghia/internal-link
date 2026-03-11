@@ -3,7 +3,7 @@
  * Plugin Name: AI Internal Linker
  * Plugin URI:  https://github.com/yourusername/ai-internal-linker
  * Description: Automatically builds internal links using AI. Scans your content, finds relevant internal posts, and naturally weaves them into your articles.
- * Version:     1.0.25
+ * Version:     1.0.26
  * Author:      Lê Lương Nghĩa
  * Author URI:  https://yourwebsite.com
  * License:     GPL-2.0+
@@ -18,7 +18,7 @@ if (!defined('WPINC')) {
 /**
  * Current plugin version.
  */
-define('AIL_VERSION', '1.0.25');
+define('AIL_VERSION', '1.0.26');
 
 /**
  * The code that runs during plugin activation.

@@ -67,8 +67,8 @@ class AIL_Click_Tracker
 
         // Assemble the click data
         $source_post_id = intval($_POST['post_id']);
-        $url = esc_url_raw(urldecode($_POST['link_url']));
-        $anchor = sanitize_text_field(urldecode($_POST['link_anchor']));
+        $url = esc_url_raw(urldecode(wp_unslash($_POST['link_url'])));
+        $anchor = sanitize_text_field(urldecode(wp_unslash($_POST['link_anchor'])));
 
         $target_post_id = url_to_postid($url);
 
