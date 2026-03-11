@@ -88,7 +88,9 @@ class AIL_GitHub_Updater
                     return $transient; // No valid tag
                 }
 
-                $out_of_date = version_compare($this->github_response['tag_name'], $checked[$this->plugin], 'gt'); // Check if we're out of date
+                $remote_version = ltrim($this->github_response['tag_name'], 'v');
+                $local_version = $checked[$this->plugin];
+                $out_of_date = version_compare($remote_version, $local_version, 'gt'); // Check if we're out of date
 
                 if ($out_of_date) {
                     $new_files = $this->github_response['zipball_url']; // Get the ZIP
@@ -98,7 +100,7 @@ class AIL_GitHub_Updater
                         'url' => $this->plugin,
                         'slug' => $slug,
                         'package' => $new_files,
-                        'new_version' => $this->github_response['tag_name']
+                        'new_version' => $remote_version
                     );
 
                     $transient->response[$this->plugin] = (object) $plugin; // Return it in response

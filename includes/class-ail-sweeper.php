@@ -20,9 +20,6 @@ class AIL_Sweeper
         add_action('ail_regex_sweep_cron', array($this, 'run_regex_sweep'));
     }
 
-    /**
-     * CronJob 1: Build the queue of all posts that need checking (Every 6 hours)
-     */
     public function run_batch_index()
     {
         // Only run if batch processing is enabled
@@ -32,13 +29,25 @@ class AIL_Sweeper
 
         global $wpdb;
 
-        // Reset pointer to 0
-        update_option('ail_batch_queue_pointer', 0);
-
-        // Fetch all published post IDs
+        // Fetch all published post IDs that haven't been processed in the last 7 days
         $post_types = "('post')"; // Extend if needed
-        $query = "SELECT ID FROM {$wpdb->posts} WHERE post_type IN $post_types AND post_status = 'publish' ORDER BY ID DESC";
+        $seven_days_ago = date('Y-m-d H:i:s', time() - 7 * DAY_IN_SECONDS);
+
+        $query = $wpdb->prepare("
+            SELECT p.ID 
+            FROM {$wpdb->posts} p
+            LEFT JOIN {$wpdb->postmeta} pm ON p.ID = pm.post_id AND pm.meta_key = '_ail_last_processed'
+            WHERE p.post_type IN $post_types 
+            AND p.post_status = 'publish' 
+            AND (pm.meta_value IS NULL OR pm.meta_value < %s)
+            ORDER BY p.ID DESC
+        ", $seven_days_ago);
+
         $post_ids = $wpdb->get_col($query);
+
+        // Even if we are half-way through, resetting pointer to 0 is safe because 
+        // the new queue only contains unprocessed posts.
+        update_option('ail_batch_queue_pointer', 0);
 
         if (!empty($post_ids)) {
             // Save as JSON encoded array in wp_options
@@ -159,6 +168,9 @@ class AIL_Sweeper
                     ));
                 }
             }
+
+            // Mark post as processed
+            update_post_meta($post_id, '_ail_last_processed', current_time('mysql'));
 
             $processed_count++;
         }
