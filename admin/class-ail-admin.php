@@ -557,7 +557,7 @@ class AIL_Admin
                     // Update stats
                     global $wpdb;
                     $table = $wpdb->prefix . 'ail_link_stats';
-                    $wpdb->query("UPDATE $table SET inbound_internal_links = inbound_internal_links + 1 WHERE post_id = $target_post_id");
+                    $wpdb->query($wpdb->prepare("UPDATE $table SET inbound_internal_links = inbound_internal_links + 1 WHERE post_id = %d", $target_post_id));
                 }
             }
             $processed++;
