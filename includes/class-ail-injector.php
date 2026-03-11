@@ -58,6 +58,8 @@ class AIL_Injector
 
         // Get limits
         $max_links = intval(get_option('ail_max_links', 5));
+        // Use batch size option for how many candidates to send to AI (default 10 for speed)
+        $ai_candidate_limit = min(count($candidates), intval(get_option('ail_batch_size', 10)));
         $max_repeat = intval(get_option('ail_max_anchor_repeat', 3));
 
         // Prepare Prompt to get JSON map
@@ -258,11 +260,12 @@ class AIL_Injector
             }
         }
 
-        // Just send stripped text to help AI focus and save tokens, 
-        // because we use PHP regex to inject back into HTML anyway.
+        // Send only first 3000 chars of stripped text to AI to minimize tokens and latency.
+        // PHP regex injects links back into full HTML anyway, so partial text is sufficient.
         $clean_text = wp_strip_all_tags($content);
+        $clean_text = mb_substr($clean_text, 0, 3000);
 
-        $prompt .= "\n### TEXT CONTENT:\n";
+        $prompt .= "\n### TEXT CONTENT (first 3000 chars):\n";
         $prompt .= $clean_text;
 
         return $prompt;
