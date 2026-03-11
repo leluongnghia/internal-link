@@ -60,6 +60,16 @@ class AIL_Admin
             'ai-internal-links-orphaned',
             array($this, 'display_plugin_orphaned_page')
         );
+
+        // Add Keyword Clusters Submenu
+        add_submenu_page(
+            'ai-internal-links',
+            'Keyword Clusters',
+            '🔮 Keyword Clusters',
+            'manage_options',
+            'ai-internal-links-clusters',
+            array($this, 'display_plugin_clusters_page')
+        );
     }
 
     /**
@@ -84,6 +94,14 @@ class AIL_Admin
     public function display_plugin_orphaned_page()
     {
         require_once plugin_dir_path(__FILE__) . 'partials/ail-admin-orphaned.php';
+    }
+
+    /**
+     * Display keyword clusters page
+     */
+    public function display_plugin_clusters_page()
+    {
+        require_once plugin_dir_path(__FILE__) . 'partials/ail-admin-clusters.php';
     }
 
     /**
@@ -197,7 +215,7 @@ class AIL_Admin
     public function render_interactive_scanner_meta_box($post)
     {
         $nonce = wp_create_nonce('ail_interactive_scan_' . $post->ID);
-        ?>
+?>
         <div class="ail-scanner-container">
             <p>Scan your content to get real-time internal link suggestions from AI.</p>
             <button type="button" class="button button-primary ail-scan-btn" data-id="<?php echo esc_attr($post->ID); ?>"
@@ -223,7 +241,7 @@ class AIL_Admin
                 font-weight: bold;
             }
         </style>
-        <?php
+<?php
     }
 
     /**
@@ -533,6 +551,97 @@ class AIL_Admin
     }
 
     /**
+     * AJAX handler to run the Keyword Clustering algorithm
+     */
+    public function ajax_run_clustering()
+    {
+        if (!current_user_can('manage_options') || !check_ajax_referer('ail_run_clustering', 'nonce', false)) {
+            wp_send_json_error(array('message' => 'Unauthorized.'));
+        }
+
+        if (!class_exists('AIL_Keyword_Clusterer')) {
+            require_once plugin_dir_path(dirname(__FILE__)) . 'includes/class-ail-keyword-clusterer.php';
+        }
+
+        $clusterer = new AIL_Keyword_Clusterer();
+        $result    = $clusterer->run();
+
+        if ($result['total'] === 0) {
+            wp_send_json_error(array('message' => 'No keywords found. Please import keywords first.'));
+        }
+
+        wp_send_json_success(array(
+            'message'       => sprintf(
+                '✅ Clustering complete! Found <strong>%d clusters</strong> from %d keywords.',
+                $result['cluster_count'],
+                $result['total']
+            ),
+            'cluster_count' => $result['cluster_count'],
+            'total'         => $result['total'],
+        ));
+    }
+
+    /**
+     * AJAX handler to delete all imported keywords (reset)
+     */
+    public function ajax_delete_keywords()
+    {
+        if (!current_user_can('manage_options') || !check_ajax_referer('ail_delete_keywords', 'nonce', false)) {
+            wp_send_json_error(array('message' => 'Unauthorized.'));
+        }
+
+        global $wpdb;
+        $table = $wpdb->prefix . 'ail_keywords';
+        $wpdb->query("TRUNCATE TABLE $table");
+
+        wp_send_json_success(array('message' => 'All keywords deleted successfully.'));
+    }
+
+    /**
+     * AJAX handler to return cluster data for the UI (JSON)
+     */
+    public function ajax_get_cluster_data()
+    {
+        if (!current_user_can('manage_options')) {
+            wp_send_json_error(array('message' => 'Unauthorized.'));
+        }
+
+        if (!class_exists('AIL_Keyword_Clusterer')) {
+            require_once plugin_dir_path(dirname(__FILE__)) . 'includes/class-ail-keyword-clusterer.php';
+        }
+
+        $map  = AIL_Keyword_Clusterer::get_cluster_post_map();
+        $gaps = AIL_Keyword_Clusterer::get_content_gaps();
+
+        // Serialize for JSON (WP_Post objects are not serializable cleanly)
+        $map_clean = [];
+        foreach ($map as $name => $data) {
+            $post_data = null;
+            if ($data['post']) {
+                $post_data = [
+                    'ID'          => $data['post']->ID,
+                    'title'       => $data['post']->post_title,
+                    'url'         => get_permalink($data['post']->ID),
+                    'edit_url'    => get_edit_post_link($data['post']->ID, 'raw'),
+                ];
+            }
+            $map_clean[$name] = [
+                'name'    => $name,
+                'pillar'  => $data['pillar'],
+                'spokes'  => $data['spokes'],
+                'volume'  => $data['volume'],
+                'intent'  => $data['intent'],
+                'post'    => $post_data,
+            ];
+        }
+
+        wp_send_json_success(array(
+            'clusters' => array_values($map_clean),
+            'gaps'     => $gaps,
+        ));
+    }
+
+    /**
      * AJAX handler to import keywords from an Excel (.xlsx) file
      */
     public function ajax_import_keywords()
@@ -546,7 +655,7 @@ class AIL_Admin
         }
 
         $file = $_FILES['file'];
-        
+
         // Allowed extensions
         $ext = strtolower(pathinfo($file['name'], PATHINFO_EXTENSION));
         if ($ext !== 'xlsx' && $ext !== 'csv') {
@@ -560,18 +669,18 @@ class AIL_Admin
         try {
             $imported_count = 0;
             $skipped_count = 0;
-            
+
             if ($ext === 'xlsx') {
                 if ($xlsx = \Shuchkin\SimpleXLSX::parse($file['tmp_name'])) {
                     $rows = $xlsx->rows();
                     $header = array_shift($rows);
-                    
+
                     foreach ($rows as $row) {
                         $keyword = isset($row[0]) ? sanitize_text_field($row[0]) : '';
                         $intent  = isset($row[1]) ? sanitize_text_field($row[1]) : '';
                         $volume  = isset($row[2]) ? intval(str_replace(',', '', $row[2])) : 0;
                         $kd      = isset($row[3]) ? floatval($row[3]) : 0.0;
-                        
+
                         if (empty($keyword)) continue;
 
                         $inserted = $wpdb->insert(
@@ -584,7 +693,7 @@ class AIL_Admin
                             ),
                             array('%s', '%s', '%d', '%f')
                         );
-                        
+
                         if ($inserted) {
                             $imported_count++;
                         } else {
@@ -603,7 +712,7 @@ class AIL_Admin
                         $intent  = isset($data[1]) ? sanitize_text_field($data[1]) : '';
                         $volume  = isset($data[2]) ? intval(str_replace(',', '', $data[2])) : 0;
                         $kd      = isset($data[3]) ? floatval($data[3]) : 0.0;
-                        
+
                         if (empty($keyword)) continue;
 
                         $inserted = $wpdb->insert(
@@ -631,7 +740,6 @@ class AIL_Admin
                 'imported' => $imported_count,
                 'duplicates' => $skipped_count
             ));
-
         } catch (Exception $e) {
             wp_send_json_error(array('message' => $e->getMessage()));
         }

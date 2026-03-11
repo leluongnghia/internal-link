@@ -1,435 +1,1014 @@
 <?php
+
 /**
- * Provide a admin area view for the plugin
- *
- * @package    AI_Internal_Linker
- * @subpackage AI_Internal_Linker/admin/partials
+ * AI Internal Linker – Settings Page
+ * Design: Data-Dense Dashboard | Fira Sans | #3B82F6 primary
  */
+if (! defined('ABSPATH')) exit;
+$provider = get_option('ail_api_provider', 'openai');
 ?>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fira+Sans:wght@300;400;500;600;700&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
 
-<div class="ail-wrap wrap">
-    <h1>AI Internal Linker Settings</h1>
+<div id="ail-settings-app" class="ail-s-wrap wrap">
 
-    <!-- Status Bar -->
-    <div class="ail-status-bar">
-        <div class="ail-status-item">
-            <span class="ail-status-indicator active"></span>
-            System Status: Online
+    <!-- ── HEADER ──────────────────────────────────────────────────────── -->
+    <div class="ail-s-header">
+        <div class="ail-s-header__icon">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" />
+                <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" />
+            </svg>
         </div>
-        <div class="ail-status-item">
-            <?php
-            $provider = get_option('ail_api_provider', 'openai');
-            echo 'Active Model: ' . esc_html(strtoupper($provider));
-            ?>
+        <div>
+            <h1 class="ail-s-header__title">AI Internal Linker</h1>
+            <p class="ail-s-header__sub">Configure API engines, link strategy, automation, and system settings</p>
+        </div>
+        <div class="ail-s-header__status">
+            <span class="ail-s-dot"></span>
+            System Online &mdash; <strong><?php echo esc_html(strtoupper($provider)); ?></strong> active
         </div>
     </div>
 
-    <form method="post" action="options.php">
+    <!-- ── FORM ────────────────────────────────────────────────────────── -->
+    <form method="post" action="options.php" id="ail-settings-form">
         <?php settings_fields('ail_options_group'); ?>
         <?php do_settings_sections('ail_options_group'); ?>
+        <input type="hidden" name="ail_api_provider" id="ail_api_provider" value="<?php echo esc_attr($provider); ?>">
 
-        <!-- Tabs Navigation -->
-        <div class="ail-tabs">
-            <div class="ail-tab active" data-tab="tab-api">API Engines</div>
-            <div class="ail-tab" data-tab="tab-strategy">Link Strategy</div>
-            <div class="ail-tab" data-tab="tab-automation">Automation</div>
-            <div class="ail-tab" data-tab="tab-system">System & Updates</div>
+        <!-- ── TABS ──────────────────────────────────────────────────────── -->
+        <div class="ail-s-tabs" role="tablist">
+            <button type="button" class="ail-s-tab ail-s-tab--active" data-tab="api" role="tab" aria-selected="true">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <rect x="2" y="3" width="20" height="14" rx="2" ry="2" />
+                    <line x1="8" y1="21" x2="16" y2="21" />
+                    <line x1="12" y1="17" x2="12" y2="21" />
+                </svg>
+                API Engines
+            </button>
+            <button type="button" class="ail-s-tab" data-tab="strategy" role="tab" aria-selected="false">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="18" y1="20" x2="18" y2="10" />
+                    <line x1="12" y1="20" x2="12" y2="4" />
+                    <line x1="6" y1="20" x2="6" y2="14" />
+                </svg>
+                Link Strategy
+            </button>
+            <button type="button" class="ail-s-tab" data-tab="automation" role="tab" aria-selected="false">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="12" cy="12" r="3" />
+                    <path d="M19.07 4.93A10 10 0 0 0 4.93 19.07" />
+                    <path d="M4.93 4.93A10 10 0 0 1 19.07 19.07" />
+                </svg>
+                Automation
+            </button>
+            <button type="button" class="ail-s-tab" data-tab="system" role="tab" aria-selected="false">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="12" cy="12" r="3" />
+                    <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z" />
+                </svg>
+                System &amp; Updates
+            </button>
         </div>
 
-        <!-- Tab Content: API Engines -->
-        <div id="tab-api" class="ail-tab-content active">
-            <div class="ail-card interactive">
-                <h2 class="ail-card-header">Select AI Engine</h2>
-                <input type="hidden" name="ail_api_provider" id="ail_api_provider"
-                    value="<?php echo esc_attr($provider); ?>">
-                <div class="ail-provider-grid">
-                    <div class="ail-card ail-provider-card <?php echo ($provider === 'openai') ? 'active' : ''; ?>"
-                        data-provider="openai">
-                        <h3>OpenAI</h3>
-                        <p class="ail-help-text">GPT-4o, GPT-4 Turbo</p>
+        <!-- ── TAB: API ENGINES ───────────────────────────────────────────── -->
+        <div class="ail-s-pane" id="ail-pane-api">
+
+            <!-- Provider selector -->
+            <div class="ail-s-card">
+                <div class="ail-s-card__head">Select AI Engine</div>
+                <div class="ail-s-providers">
+                    <?php
+                    $providers = [
+                        'openai' => ['name' => 'OpenAI',        'sub' => 'GPT-4o, GPT-4 Turbo', 'icon' => '<path d="M12 2L2 7l10 5 10-5-10-5M2 17l10 5 10-5M2 12l10 5 10-5"/>'],
+                        'gemini' => ['name' => 'Google Gemini', 'sub' => 'Gemini 2.5, 2.0 &amp; 1.5 Series', 'icon' => '<circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>'],
+                        'grok'   => ['name' => 'Grok (xAI)',    'sub' => 'Grok 2, Grok 3, Grok 4.1', 'icon' => '<polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>'],
+                    ];
+                    foreach ($providers as $key => $p):
+                    ?>
+                        <div class="ail-s-provider <?php echo ($provider === $key) ? 'ail-s-provider--active' : ''; ?>" data-provider="<?php echo esc_attr($key); ?>" role="button" tabindex="0" aria-pressed="<?php echo ($provider === $key) ? 'true' : 'false'; ?>">
+                            <div class="ail-s-provider__icon">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><?php echo $p['icon']; ?></svg>
+                            </div>
+                            <div>
+                                <div class="ail-s-provider__name"><?php echo esc_html($p['name']); ?></div>
+                                <div class="ail-s-provider__sub"><?php echo $p['sub']; ?></div>
+                            </div>
+                        </div>
+                    <?php endforeach; ?>
+                </div>
+            </div>
+
+            <!-- OpenAI config -->
+            <div class="ail-s-card ail-s-provgroup ail-s-provgroup--openai" <?php echo ($provider !== 'openai') ? 'style="display:none"' : ''; ?>>
+                <div class="ail-s-card__head">OpenAI Configuration</div>
+                <div class="ail-s-fields">
+                    <?php $o_model = get_option('ail_openai_model', 'gpt-4o'); ?>
+                    <div class="ail-s-field">
+                        <label class="ail-s-label" for="ail_openai_model">Model</label>
+                        <select name="ail_openai_model" id="ail_openai_model" class="ail-s-select">
+                            <option value="gpt-4o" <?php selected($o_model, 'gpt-4o'); ?>>GPT-4o (Recommended)</option>
+                            <option value="gpt-4-turbo" <?php selected($o_model, 'gpt-4-turbo'); ?>>GPT-4 Turbo</option>
+                            <option value="gpt-4o-mini" <?php selected($o_model, 'gpt-4o-mini'); ?>>GPT-4o Mini</option>
+                        </select>
                     </div>
-                    <div class="ail-card ail-provider-card <?php echo ($provider === 'gemini') ? 'active' : ''; ?>"
-                        data-provider="gemini">
-                        <h3>Google Gemini</h3>
-                        <p class="ail-help-text">Gemini 2.5, 2.0 & 1.5 Series</p>
-                    </div>
-                    <div class="ail-card ail-provider-card <?php echo ($provider === 'grok') ? 'active' : ''; ?>"
-                        data-provider="grok">
-                        <h3>Grok (xAI)</h3>
-                        <p class="ail-help-text">Grok 2, Grok 3</p>
+                    <div class="ail-s-field">
+                        <label class="ail-s-label" for="ail_openai_key">API Key</label>
+                        <input type="password" name="ail_openai_key" id="ail_openai_key" class="ail-s-input" value="<?php echo esc_attr(get_option('ail_openai_key')); ?>" placeholder="sk-..." autocomplete="off">
+                        <p class="ail-s-hint"><a href="https://platform.openai.com/api-keys" target="_blank" rel="noopener">Get your OpenAI API key</a></p>
                     </div>
                 </div>
             </div>
 
-            <!-- OpenAI Settings -->
-            <div class="ail-card ail-provider-group ail-provider-openai" <?php echo ($provider !== 'openai') ? 'style="display:none;"' : ''; ?>>
-                <h2 class="ail-card-header">OpenAI Configuration</h2>
-                <table class="form-table">
-                    <tr>
-                        <th scope="row">Model</th>
-                        <td>
-                            <?php $o_model = get_option('ail_openai_model', 'gpt-4o'); ?>
-                            <select name="ail_openai_model" class="ail-select">
-                                <option value="gpt-4o" <?php selected($o_model, 'gpt-4o'); ?>>GPT-4o (Recommended)
-                                </option>
-                                <option value="gpt-4-turbo" <?php selected($o_model, 'gpt-4-turbo'); ?>>GPT-4 Turbo
-                                </option>
-                                <option value="gpt-4o-mini" <?php selected($o_model, 'gpt-4o-mini'); ?>>GPT-4o Mini
-                                </option>
-                            </select>
-                        </td>
-                    </tr>
-                    <tr>
-                        <th scope="row">API Key</th>
-                        <td>
-                            <input type="password" name="ail_openai_key" class="ail-input"
-                                value="<?php echo esc_attr(get_option('ail_openai_key')); ?>" placeholder="sk-..." />
-                            <p class="description"><a href="https://platform.openai.com/api-keys" target="_blank">Get
-                                    your OpenAI API key here</a></p>
-                        </td>
-                    </tr>
-                </table>
+            <!-- Gemini config -->
+            <div class="ail-s-card ail-s-provgroup ail-s-provgroup--gemini" <?php echo ($provider !== 'gemini') ? 'style="display:none"' : ''; ?>>
+                <div class="ail-s-card__head">Gemini Configuration</div>
+                <div class="ail-s-fields">
+                    <?php $g_model = get_option('ail_gemini_model', 'gemini-2.0-flash'); ?>
+                    <div class="ail-s-field">
+                        <label class="ail-s-label" for="ail_gemini_model">Model</label>
+                        <select name="ail_gemini_model" id="ail_gemini_model" class="ail-s-select">
+                            <option value="gemini-2.5-flash" <?php selected($g_model, 'gemini-2.5-flash'); ?>>Gemini 2.5 Flash</option>
+                            <option value="gemini-2.0-flash" <?php selected($g_model, 'gemini-2.0-flash'); ?>>Gemini 2.0 Flash</option>
+                            <option value="gemini-2.0-flash-lite" <?php selected($g_model, 'gemini-2.0-flash-lite'); ?>>Gemini 2.0 Flash-Lite</option>
+                            <option value="gemini-2.0-pro-exp" <?php selected($g_model, 'gemini-2.0-pro-exp'); ?>>Gemini 2.0 Pro Experimental</option>
+                            <option value="gemini-1.5-pro" <?php selected($g_model, 'gemini-1.5-pro'); ?>>Gemini 1.5 Pro</option>
+                            <option value="gemini-1.5-flash" <?php selected($g_model, 'gemini-1.5-flash'); ?>>Gemini 1.5 Flash</option>
+                            <option value="gemini-1.5-flash-8b" <?php selected($g_model, 'gemini-1.5-flash-8b'); ?>>Gemini 1.5 Flash-8B</option>
+                        </select>
+                    </div>
+                    <div class="ail-s-field">
+                        <label class="ail-s-label" for="ail_gemini_key">API Key</label>
+                        <input type="password" name="ail_gemini_key" id="ail_gemini_key" class="ail-s-input" value="<?php echo esc_attr(get_option('ail_gemini_key')); ?>" placeholder="AIzaSy..." autocomplete="off">
+                        <p class="ail-s-hint"><a href="https://aistudio.google.com/app/apikey" target="_blank" rel="noopener">Get your Gemini API key</a></p>
+                    </div>
+                </div>
             </div>
 
-            <!-- Gemini Settings -->
-            <div class="ail-card ail-provider-group ail-provider-gemini" <?php echo ($provider !== 'gemini') ? 'style="display:none;"' : ''; ?>>
-                <h2 class="ail-card-header">Gemini Configuration</h2>
-                <table class="form-table">
-                    <tr>
-                        <th scope="row">Model</th>
-                        <td>
-                            <?php $g_model = get_option('ail_gemini_model', 'gemini-1.5-pro'); ?>
-                            <select name="ail_gemini_model" class="ail-select">
-                                <option value="gemini-2.5-flash" <?php selected($g_model, 'gemini-2.5-flash'); ?>>Gemini
-                                    2.5 Flash</option>
-                                <option value="gemini-2.0-flash" <?php selected($g_model, 'gemini-2.0-flash'); ?>>Gemini
-                                    2.0 Flash</option>
-                                <option value="gemini-2.0-flash-lite" <?php selected($g_model, 'gemini-2.0-flash-lite'); ?>>Gemini 2.0 Flash-Lite</option>
-                                <option value="gemini-2.0-pro-exp" <?php selected($g_model, 'gemini-2.0-pro-exp'); ?>>
-                                    Gemini 2.0 Pro Experimental</option>
-                                <option value="gemini-1.5-pro" <?php selected($g_model, 'gemini-1.5-pro'); ?>>Gemini 1.5
-                                    Pro</option>
-                                <option value="gemini-1.5-flash" <?php selected($g_model, 'gemini-1.5-flash'); ?>>Gemini
-                                    1.5 Flash</option>
-                                <option value="gemini-1.5-flash-8b" <?php selected($g_model, 'gemini-1.5-flash-8b'); ?>>
-                                    Gemini 1.5 Flash-8B</option>
-                            </select>
-                        </td>
-                    </tr>
-                    <tr>
-                        <th scope="row">API Key</th>
-                        <td>
-                            <input type="password" name="ail_gemini_key" class="ail-input"
-                                value="<?php echo esc_attr(get_option('ail_gemini_key')); ?>" placeholder="AIzaSy..." />
-                            <p class="description"><a href="https://aistudio.google.com/app/apikey" target="_blank">Get
-                                    your Gemini API key here</a></p>
-                        </td>
-                    </tr>
-                </table>
+            <!-- Grok config -->
+            <div class="ail-s-card ail-s-provgroup ail-s-provgroup--grok" <?php echo ($provider !== 'grok') ? 'style="display:none"' : ''; ?>>
+                <div class="ail-s-card__head">Grok Configuration</div>
+                <div class="ail-s-fields">
+                    <?php $x_model = get_option('ail_grok_model', 'grok-2-1212'); ?>
+                    <div class="ail-s-field">
+                        <label class="ail-s-label" for="ail_grok_model">Model</label>
+                        <select name="ail_grok_model" id="ail_grok_model" class="ail-s-select">
+                            <option value="grok-2-1212" <?php selected($x_model, 'grok-2-1212'); ?>>Grok 2</option>
+                            <option value="grok-3" <?php selected($x_model, 'grok-3'); ?>>Grok 3</option>
+                            <option value="grok-4-1-fast-reasoning" <?php selected($x_model, 'grok-4-1-fast-reasoning'); ?>>Grok 4.1 Fast Reasoning</option>
+                        </select>
+                    </div>
+                    <div class="ail-s-field">
+                        <label class="ail-s-label" for="ail_grok_key">API Key</label>
+                        <input type="password" name="ail_grok_key" id="ail_grok_key" class="ail-s-input" value="<?php echo esc_attr(get_option('ail_grok_key')); ?>" placeholder="xai-..." autocomplete="off">
+                        <p class="ail-s-hint"><a href="https://docs.x.ai/developers/quickstart" target="_blank" rel="noopener">Get your Grok API key</a></p>
+                    </div>
+                </div>
             </div>
+        </div><!-- #ail-pane-api -->
 
-            <!-- Grok Settings -->
-            <div class="ail-card ail-provider-group ail-provider-grok" <?php echo ($provider !== 'grok') ? 'style="display:none;"' : ''; ?>>
-                <h2 class="ail-card-header">Grok Configuration</h2>
-                <table class="form-table">
-                    <tr>
-                        <th scope="row">Model</th>
-                        <td>
-                            <?php $x_model = get_option('ail_grok_model', 'grok-2-1212'); ?>
-                            <select name="ail_grok_model" class="ail-select">
-                                <option value="grok-2-1212" <?php selected($x_model, 'grok-2-1212'); ?>>Grok 2</option>
-                                <option value="grok-3" <?php selected($x_model, 'grok-3'); ?>>Grok 3</option>
-                                <option value="grok-4-1-fast-reasoning" <?php selected($x_model, 'grok-4-1-fast-reasoning'); ?>>Grok 4.1 Fast Reasoning</option>
-                            </select>
-                        </td>
-                    </tr>
-                    <tr>
-                        <th scope="row">API Key</th>
-                        <td>
-                            <input type="password" name="ail_grok_key" class="ail-input"
-                                value="<?php echo esc_attr(get_option('ail_grok_key')); ?>" placeholder="xai-..." />
-                            <p class="description"><a href="https://docs.x.ai/developers/quickstart" target="_blank">Get
-                                    your Grok API key here</a></p>
-                        </td>
-                    </tr>
-                </table>
-            </div>
-        </div>
+        <!-- ── TAB: LINK STRATEGY ─────────────────────────────────────────── -->
+        <div class="ail-s-pane" id="ail-pane-strategy" style="display:none">
+            <div class="ail-s-card">
+                <div class="ail-s-card__head">Content Filtering</div>
+                <div class="ail-s-fields">
+                    <div class="ail-s-field">
+                        <label class="ail-s-label" for="ail_link_source">Link Source Strategy</label>
+                        <select name="ail_link_source" id="ail_link_source" class="ail-s-select">
+                            <option value="category" <?php selected(get_option('ail_link_source'), 'category'); ?>>Same Category (Recommended)</option>
+                            <option value="tag" <?php selected(get_option('ail_link_source'), 'tag'); ?>>Same Tag</option>
+                            <option value="silo" <?php selected(get_option('ail_link_source'), 'silo'); ?>>Content Silo (Pillar &amp; Cluster)</option>
+                            <option value="all" <?php selected(get_option('ail_link_source'), 'all'); ?>>All Content (Slow)</option>
+                        </select>
+                        <p class="ail-s-hint">Where should the AI look for internal link candidates?</p>
+                    </div>
 
-        <!-- Tab Content: Link Strategy -->
-        <div id="tab-strategy" class="ail-tab-content">
-            <div class="ail-card interactive">
-                <h2 class="ail-card-header">Content Filtering</h2>
-                <table class="form-table">
-                    <tr>
-                        <th scope="row">Link Source Strategy</th>
-                        <td>
-                            <select name="ail_link_source" class="ail-select">
-                                <option value="category" <?php selected(get_option('ail_link_source'), 'category'); ?>>
-                                    Same Category (Recommended)</option>
-                                <option value="tag" <?php selected(get_option('ail_link_source'), 'tag'); ?>>Same Tag
-                                </option>
-                                <option value="silo" <?php selected(get_option('ail_link_source'), 'silo'); ?>>Content
-                                    Silo (Pillar & Cluster)</option>
-                                <option value="all" <?php selected(get_option('ail_link_source'), 'all'); ?>>All Content
-                                    (Slow)</option>
-                            </select>
-                            <span class="ail-help-text">Where should the AI look for internal link candidates?</span>
-                        </td>
-                    </tr>
-                    <tr>
-                        <th scope="row">Optimization Skills</th>
-                        <td>
-                            <div
-                                style="background: var(--ail-bg-canvas); padding: 16px; border-radius: 6px; border: 1px solid var(--ail-border);">
-                                <label style="display:flex; align-items:center; gap:8px;">
-                                    <input type="checkbox" id="ail_skill_select_all"> <strong>Select All Skills</strong>
-                                </label>
-                                <hr style="border-color: var(--ail-border); margin: 12px 0;">
-                                <?php
-                                $upload_dir = wp_upload_dir();
-                                $skills_dir = trailingslashit($upload_dir['basedir']) . 'aprg-skills/';
-                                $all_skills = array();
-                                $has_skills = false;
-                                if (file_exists($skills_dir)) {
-                                    $files = glob($skills_dir . '*.md');
-                                    if ($files) {
-                                        $has_skills = true;
-                                        foreach ($files as $file) {
-                                            $all_skills[] = basename($file, '.md');
-                                        }
-                                    }
-                                }
-                                $saved_skills = get_option('ail_selected_skill');
-                                $selected_skills = ($saved_skills === false) ? $all_skills : (is_array($saved_skills) ? $saved_skills : array());
-
-                                if ($has_skills) {
-                                    echo '<div style="display:grid; grid-template-columns: 1fr 1fr; gap: 8px;">';
-                                    foreach ($all_skills as $filename) {
-                                        $checked = in_array($filename, $selected_skills) ? 'checked' : '';
-                                        echo '<label style="display:flex; align-items:center; gap:8px;"><input type="checkbox" name="ail_selected_skill[]" value="' . esc_attr($filename) . '" class="ail-skill-checkbox" ' . $checked . '> ' . esc_html($filename) . '</label>';
-                                    }
-                                    echo '</div>';
-                                } else {
-                                    echo '<span class="ail-help-text">No skills found in /aprg-skills/</span>';
-                                }
-                                ?>
-                            </div>
-                        </td>
-                    </tr>
-                </table>
-            </div>
-
-            <div class="ail-card interactive">
-                <h2 class="ail-card-header">Injection Limits</h2>
-                <table class="form-table">
-                    <tr>
-                        <th scope="row">Max Links per Post</th>
-                        <td>
-                            <input type="number" name="ail_max_links" class="ail-input" style="max-width: 100px;"
-                                value="<?php echo esc_attr(get_option('ail_max_links', 5)); ?>" min="1" max="50" />
-                            <span class="ail-help-text">Maximum internal links injected per run.</span>
-                        </td>
-                    </tr>
-                    <tr>
-                        <th scope="row">Max Anchor Repeat</th>
-                        <td>
-                            <input type="number" name="ail_max_anchor_repeat" class="ail-input"
-                                style="max-width: 100px;"
-                                value="<?php echo esc_attr(get_option('ail_max_anchor_repeat', 3)); ?>" min="1"
-                                max="100" />
-                            <span class="ail-help-text">Limit reusing the exact same anchor pointing to the same
-                                URL.</span>
-                        </td>
-                    </tr>
-                </table>
-            </div>
-        </div>
-
-        <!-- Tab Content: Automation -->
-        <div id="tab-automation" class="ail-tab-content">
-            <div class="ail-card interactive">
-                <h2 class="ail-card-header">Trigger Events</h2>
-                <table class="form-table">
-                    <tr>
-                        <th scope="row">Auto-Link on Save</th>
-                        <td>
-                            <label class="ail-toggle">
-                                <input type="hidden" name="ail_auto_on_save" value="0">
-                                <input type="checkbox" name="ail_auto_on_save" value="1" <?php checked(get_option('ail_auto_on_save'), 1); ?>>
-                                <span class="ail-toggle-slider"></span>
+                    <div class="ail-s-field">
+                        <label class="ail-s-label">Optimization Skills</label>
+                        <div class="ail-s-skills-box">
+                            <label class="ail-s-skills-all">
+                                <input type="checkbox" id="ail_skill_select_all"> <span>Select All Skills</span>
                             </label>
-                            <span class="ail-help-text">Automatically process and inject when saving/publishing a
-                                post.</span>
-                        </td>
-                    </tr>
-                    <tr>
-                        <th scope="row">Background processing</th>
-                        <td>
-                            <label class="ail-toggle">
-                                <input type="hidden" name="ail_background_mode" value="0">
-                                <input type="checkbox" name="ail_background_mode" value="1" <?php checked(get_option('ail_background_mode'), 1); ?>>
-                                <span class="ail-toggle-slider"></span>
-                            </label>
-                            <span class="ail-help-text">Run asynchronously. Recommend ON for large sites so saving isn't
-                                slow.</span>
-                        </td>
-                    </tr>
-                </table>
-            </div>
-
-            <div class="ail-card interactive">
-                <h2 class="ail-card-header">Batch Processing (Cron)</h2>
-                <table class="form-table">
-                    <tr>
-                        <th scope="row">Enable Daily Cron</th>
-                        <td>
-                            <label class="ail-toggle">
-                                <input type="hidden" name="ail_batch_enabled" value="0">
-                                <input type="checkbox" name="ail_batch_enabled" value="1" <?php checked(get_option('ail_batch_enabled', 1), 1); ?>>
-                                <span class="ail-toggle-slider"></span>
-                            </label>
-                            <span class="ail-help-text">Activate the automatic background scanner for older
-                                posts.</span>
-                        </td>
-                    </tr>
-                </table>
-            </div>
-        </div>
-
-        <!-- Tab Content: System -->
-        <div id="tab-system" class="ail-tab-content">
-            <div class="ail-card interactive">
-                <h2 class="ail-card-header">GitHub Auto Updater</h2>
-                <table class="form-table">
-                    <tr>
-                        <th scope="row">Repository URL</th>
-                        <td>
-                            <input type="url" name="ail_github_updater_url" class="ail-input"
-                                value="<?php echo esc_attr(get_option('ail_github_updater_url')); ?>"
-                                placeholder="https://github.com/leluongnghia/internal-link" />
-                            <span class="ail-help-text">Full URL to GitHub repo for automatic updates.</span>
-                        </td>
-                    </tr>
-                    <tr>
-                        <th scope="row">GitHub Token (Optional)</th>
-                        <td>
-                            <input type="password" name="ail_github_updater_token" class="ail-input"
-                                value="<?php echo esc_attr(get_option('ail_github_updater_token')); ?>"
-                                placeholder="ghp_..." />
-                            <span class="ail-help-text">Required if repository is Private or to bypass rate
-                                limits.</span>
-                        </td>
-                    </tr>
-                </table>
-            </div>
-
-            <div class="ail-card">
-                <h2 class="ail-card-header">Current Status</h2>
-                <table class="form-table">
-                    <tr>
-                        <th scope="row">Current Version</th>
-                        <td><strong><?php echo esc_html(AIL_VERSION); ?></strong></td>
-                    </tr>
-                    <tr>
-                        <th scope="row">Repository URL</th>
-                        <td>
+                            <hr class="ail-s-divider">
                             <?php
-                            $ail_repo_url = get_option('ail_github_updater_url', '');
-                            if ($ail_repo_url) {
-                                echo '<a href="' . esc_url($ail_repo_url) . '" target="_blank">' . esc_html($ail_repo_url) . '</a>';
-                            } else {
-                                echo '<em>Chưa cấu hình</em>';
+                            $upload_dir    = wp_upload_dir();
+                            $skills_dir    = trailingslashit($upload_dir['basedir']) . 'aprg-skills/';
+                            $all_skills    = [];
+                            $has_skills    = false;
+                            if (file_exists($skills_dir)) {
+                                $files = glob($skills_dir . '*.md');
+                                if ($files) {
+                                    $has_skills = true;
+                                    foreach ($files as $f) $all_skills[] = basename($f, '.md');
+                                }
                             }
+                            $saved_skills    = get_option('ail_selected_skill');
+                            $selected_skills = ($saved_skills === false) ? $all_skills : (is_array($saved_skills) ? $saved_skills : []);
+                            if ($has_skills):
                             ?>
-                        </td>
-                    </tr>
-                    <tr>
-                        <th scope="row">GitHub Token</th>
-                        <td>
-                            <?php
-                            $ail_token = get_option('ail_github_updater_token', '');
-                            if (!empty($ail_token)) {
-                                echo '<span style="color:var(--ail-success);">&#x2705; Đã cấu hình (' . esc_html(substr($ail_token, 0, 8)) . '...)</span>';
-                            } else {
-                                echo '<span>&#x274C; Chưa có token (chỉ cần nếu repo private)</span>';
-                            }
-                            ?>
-                        </td>
-                    </tr>
-                    <tr>
-                        <th scope="row">Force Check Update</th>
-                        <td>
-                            <button type="button" id="ail-force-update-btn" class="ail-btn ail-btn-secondary">
-                                <span class="dashicons dashicons-update" style="margin-top:3px;"></span>
-                                &#x1F504; Kiểm tra ngay (Clear Cache)
+                                <div class="ail-s-skills-grid">
+                                    <?php foreach ($all_skills as $sk): ?>
+                                        <label class="ail-s-skill-item">
+                                            <input type="checkbox" name="ail_selected_skill[]" value="<?php echo esc_attr($sk); ?>" class="ail-skill-checkbox" <?php echo in_array($sk, $selected_skills) ? 'checked' : ''; ?>>
+                                            <span><?php echo esc_html($sk); ?></span>
+                                        </label>
+                                    <?php endforeach; ?>
+                                </div>
+                            <?php else: ?>
+                                <p class="ail-s-hint">No skills found in <code>/aprg-skills/</code></p>
+                            <?php endif; ?>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="ail-s-card">
+                <div class="ail-s-card__head">Injection Limits</div>
+                <div class="ail-s-fields ail-s-fields--row">
+                    <div class="ail-s-field">
+                        <label class="ail-s-label" for="ail_max_links">Max Links per Post</label>
+                        <input type="number" name="ail_max_links" id="ail_max_links" class="ail-s-input ail-s-input--sm" value="<?php echo esc_attr(get_option('ail_max_links', 5)); ?>" min="1" max="50">
+                        <p class="ail-s-hint">Maximum internal links injected per run</p>
+                    </div>
+                    <div class="ail-s-field">
+                        <label class="ail-s-label" for="ail_max_anchor_repeat">Max Anchor Repeat</label>
+                        <input type="number" name="ail_max_anchor_repeat" id="ail_max_anchor_repeat" class="ail-s-input ail-s-input--sm" value="<?php echo esc_attr(get_option('ail_max_anchor_repeat', 3)); ?>" min="1" max="100">
+                        <p class="ail-s-hint">Limit reusing the exact same anchor text per URL</p>
+                    </div>
+                </div>
+            </div>
+        </div><!-- #ail-pane-strategy -->
+
+        <!-- ── TAB: AUTOMATION ───────────────────────────────────────────── -->
+        <div class="ail-s-pane" id="ail-pane-automation" style="display:none">
+            <div class="ail-s-card">
+                <div class="ail-s-card__head">Trigger Events</div>
+                <div class="ail-s-fields">
+                    <div class="ail-s-field ail-s-field--toggle">
+                        <div>
+                            <div class="ail-s-label">Auto-Link on Save</div>
+                            <p class="ail-s-hint">Automatically inject links when saving or publishing a post</p>
+                        </div>
+                        <label class="ail-toggle" aria-label="Auto-Link on Save">
+                            <input type="hidden" name="ail_auto_on_save" value="0">
+                            <input type="checkbox" name="ail_auto_on_save" value="1" <?php checked(get_option('ail_auto_on_save'), 1); ?>>
+                            <span class="ail-toggle__slider"></span>
+                        </label>
+                    </div>
+                    <div class="ail-s-field ail-s-field--toggle">
+                        <div>
+                            <div class="ail-s-label">Background Processing</div>
+                            <p class="ail-s-hint">Run asynchronously — recommended ON for large sites</p>
+                        </div>
+                        <label class="ail-toggle" aria-label="Background Processing">
+                            <input type="hidden" name="ail_background_mode" value="0">
+                            <input type="checkbox" name="ail_background_mode" value="1" <?php checked(get_option('ail_background_mode'), 1); ?>>
+                            <span class="ail-toggle__slider"></span>
+                        </label>
+                    </div>
+                </div>
+            </div>
+
+            <div class="ail-s-card">
+                <div class="ail-s-card__head">Batch Processing (Cron)</div>
+                <div class="ail-s-fields">
+                    <div class="ail-s-field ail-s-field--toggle">
+                        <div>
+                            <div class="ail-s-label">Enable Daily Cron</div>
+                            <p class="ail-s-hint">Activate the automatic background scanner for older posts</p>
+                        </div>
+                        <label class="ail-toggle" aria-label="Enable Daily Cron">
+                            <input type="hidden" name="ail_batch_enabled" value="0">
+                            <input type="checkbox" name="ail_batch_enabled" value="1" <?php checked(get_option('ail_batch_enabled', 1), 1); ?>>
+                            <span class="ail-toggle__slider"></span>
+                        </label>
+                    </div>
+                </div>
+            </div>
+        </div><!-- #ail-pane-automation -->
+
+        <!-- ── TAB: SYSTEM & UPDATES ─────────────────────────────────────── -->
+        <div class="ail-s-pane" id="ail-pane-system" style="display:none">
+            <div class="ail-s-card">
+                <div class="ail-s-card__head">GitHub Auto Updater</div>
+                <div class="ail-s-fields">
+                    <div class="ail-s-field">
+                        <label class="ail-s-label" for="ail_github_updater_url">Repository URL</label>
+                        <input type="url" name="ail_github_updater_url" id="ail_github_updater_url" class="ail-s-input" value="<?php echo esc_attr(get_option('ail_github_updater_url')); ?>" placeholder="https://github.com/leluongnghia/internal-link">
+                        <p class="ail-s-hint">Full URL to GitHub repository for automatic updates</p>
+                    </div>
+                    <div class="ail-s-field">
+                        <label class="ail-s-label" for="ail_github_updater_token">GitHub Token <span class="ail-s-optional">(Optional)</span></label>
+                        <input type="password" name="ail_github_updater_token" id="ail_github_updater_token" class="ail-s-input" value="<?php echo esc_attr(get_option('ail_github_updater_token')); ?>" placeholder="ghp_..." autocomplete="off">
+                        <p class="ail-s-hint">Required for private repositories or to bypass rate limits</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="ail-s-card">
+                <div class="ail-s-card__head">Current Status</div>
+                <div class="ail-s-fields">
+                    <div class="ail-s-stat-row">
+                        <span class="ail-s-stat-label">Plugin Version</span>
+                        <span class="ail-s-stat-val"><code><?php echo esc_html(AIL_VERSION); ?></code></span>
+                    </div>
+                    <div class="ail-s-stat-row">
+                        <span class="ail-s-stat-label">Repository</span>
+                        <span class="ail-s-stat-val">
+                            <?php $repo = get_option('ail_github_updater_url', '');
+                            echo $repo ? '<a href="' . esc_url($repo) . '" target="_blank" rel="noopener">' . esc_html($repo) . '</a>' : '<em style="color:#94a3b8">Not configured</em>'; ?>
+                        </span>
+                    </div>
+                    <div class="ail-s-stat-row">
+                        <span class="ail-s-stat-label">GitHub Token</span>
+                        <span class="ail-s-stat-val">
+                            <?php $tok = get_option('ail_github_updater_token', '');
+                            if ($tok): ?>
+                                <span style="color:#16a34a;display:inline-flex;align-items:center;gap:5px"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                        <polyline points="20 6 9 17 4 12" />
+                                    </svg>Configured (<?php echo esc_html(substr($tok, 0, 8)); ?>...)</span>
+                            <?php else: ?>
+                                <span style="color:#94a3b8;display:inline-flex;align-items:center;gap:5px"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                        <line x1="18" y1="6" x2="6" y2="18" />
+                                        <line x1="6" y1="6" x2="18" y2="18" />
+                                    </svg>Not set (only needed for private repositories)</span>
+                            <?php endif; ?>
+                        </span>
+                    </div>
+                    <div class="ail-s-stat-row">
+                        <span class="ail-s-stat-label">Check for Updates</span>
+                        <span class="ail-s-stat-val" style="display:flex;flex-wrap:wrap;align-items:center;gap:12px">
+                            <button type="button" id="ail-force-update-btn" class="ail-s-btn ail-s-btn--secondary">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                    <polyline points="23 4 23 10 17 10" />
+                                    <polyline points="1 20 1 14 7 14" />
+                                    <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15" />
+                                </svg>
+                                Check for Updates
                             </button>
-                            <span id="ail-check-spinner" style="display:none; margin-left:10px;">
-                                <span class="spinner is-active" style="float:none; vertical-align:middle;"></span>
-                                Đang kiểm tra GitHub...
+                            <span id="ail-check-spinner" style="display:none;color:#64748b;font-size:13px">
+                                <svg class="ail-spin" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                    <line x1="12" y1="2" x2="12" y2="6" />
+                                    <line x1="12" y1="18" x2="12" y2="22" />
+                                    <line x1="4.93" y1="4.93" x2="7.76" y2="7.76" />
+                                    <line x1="16.24" y1="16.24" x2="19.07" y2="19.07" />
+                                    <line x1="2" y1="12" x2="6" y2="12" />
+                                    <line x1="18" y1="12" x2="22" y2="12" />
+                                    <line x1="4.93" y1="19.07" x2="7.76" y2="16.24" />
+                                    <line x1="16.24" y1="7.76" x2="19.07" y2="4.93" />
+                                </svg>
+                                Checking GitHub&hellip;
                             </span>
-                            <div id="ail-update-result" style="margin-top:12px;"></div>
-                        </td>
-                    </tr>
-                </table>
+                        </span>
+                    </div>
+                    <div id="ail-update-result"></div>
+                </div>
             </div>
+        </div><!-- #ail-pane-system -->
+
+        <!-- ── SAVE BAR ───────────────────────────────────────────────────── -->
+        <div class="ail-s-save-bar">
+            <button type="submit" class="ail-s-btn ail-s-btn--primary" name="submit" id="submit">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z" />
+                    <polyline points="17 21 17 13 7 13 7 21" />
+                    <polyline points="7 3 7 8 15 8" />
+                </svg>
+                Save Configuration
+            </button>
         </div>
-
-        <p class="submit">
-            <button type="submit" class="ail-btn ail-btn-primary" name="submit" id="submit"><span>Save
-                    Configuration</span></button>
-        </p>
     </form>
-</div>
+</div><!-- #ail-settings-app -->
 
-<script type="text/javascript">
-    document.getElementById('ail-force-update-btn').addEventListener('click', function () {
-        var btn = this;
-        var spinner = document.getElementById('ail-check-spinner');
-        var result = document.getElementById('ail-update-result');
-
-        btn.disabled = true;
-        spinner.style.display = 'inline-block';
-        result.innerHTML = '';
-
-        var data = new FormData();
-        data.append('action', 'ail_force_update_check');
-        data.append('nonce', '<?php echo wp_create_nonce('ail_force_update'); ?>');
-
-        fetch('<?php echo admin_url('admin-ajax.php'); ?>', {
-            method: 'POST',
-            body: data,
-            credentials: 'same-origin'
-        })
-            .then(function (r) { return r.json(); })
-            .then(function (resp) {
-                spinner.style.display = 'none';
-                btn.disabled = false;
-
-                if (resp.success) {
-                    var d = resp.data;
-                    var color = d.has_update ? '#d63638' : '#00a32a';
-                    var html = '<div style="padding:14px; background:var(--ail-bg-canvas); border:1px solid var(--ail-border); border-left:4px solid ' + color + '; border-radius:6px;">';
-                    html += '<strong style="display:block; margin-bottom:8px; font-size:14px;">' + d.message + '</strong>';
-                    html += 'Version hiện tại: <code>' + d.current_version + '</code> &nbsp;|&nbsp; ';
-                    html += 'Version GitHub: <code>' + d.latest_version + '</code><br>';
-                    html += 'Phát hành lúc: ' + d.published_at + '<br>';
-                    if (d.has_update) {
-                        html += '<a href="<?php echo admin_url('plugins.php'); ?>" class="ail-btn ail-btn-primary" style="margin-top:10px;">&#x2192; Vào Plugins để Update</a>';
-                    }
-                    html += '</div>';
-                    result.innerHTML = html;
-                } else {
-                    var msg = (resp.data && resp.data.message) ? resp.data.message : (resp.data || 'Lỗi không xác định');
-                    result.innerHTML = '<div style="padding:12px; background:var(--ail-bg-canvas); border:1px solid var(--ail-border); border-left:4px solid var(--ail-danger); border-radius:6px;">'
-                        + msg + '<br>Token status: ' + ((resp.data && resp.data.token_set) ? resp.data.token_set : 'N/A')
-                        + '</div>';
-                }
-            })
-            .catch(function (err) {
-                spinner.style.display = 'none';
-                btn.disabled = false;
-                result.innerHTML = '<div style="color:var(--ail-danger);">Lỗi kết nối: ' + err + '</div>';
+<script>
+    (function() {
+        // ── Tabs ──────────────────────────────────────────────────────────────
+        document.querySelectorAll('.ail-s-tab').forEach(function(tab) {
+            tab.addEventListener('click', function() {
+                document.querySelectorAll('.ail-s-tab').forEach(function(t) {
+                    t.classList.remove('ail-s-tab--active');
+                    t.setAttribute('aria-selected', 'false');
+                });
+                tab.classList.add('ail-s-tab--active');
+                tab.setAttribute('aria-selected', 'true');
+                document.querySelectorAll('.ail-s-pane').forEach(function(p) {
+                    p.style.display = 'none';
+                });
+                document.getElementById('ail-pane-' + tab.dataset.tab).style.display = '';
             });
-    });
+        });
+
+        // ── Provider cards ────────────────────────────────────────────────────
+        document.querySelectorAll('.ail-s-provider').forEach(function(card) {
+            function select() {
+                var prov = card.dataset.provider;
+                document.getElementById('ail_api_provider').value = prov;
+                document.querySelectorAll('.ail-s-provider').forEach(function(c) {
+                    c.classList.remove('ail-s-provider--active');
+                    c.setAttribute('aria-pressed', 'false');
+                });
+                card.classList.add('ail-s-provider--active');
+                card.setAttribute('aria-pressed', 'true');
+                document.querySelectorAll('.ail-s-provgroup').forEach(function(g) {
+                    g.style.display = 'none';
+                });
+                var target = document.querySelector('.ail-s-provgroup--' + prov);
+                if (target) target.style.display = '';
+            }
+            card.addEventListener('click', select);
+            card.addEventListener('keydown', function(e) {
+                if (e.key === ' ' || e.key === 'Enter') {
+                    e.preventDefault();
+                    select();
+                }
+            });
+        });
+
+        // ── Select All Skills ─────────────────────────────────────────────────
+        var selectAll = document.getElementById('ail_skill_select_all');
+        if (selectAll) {
+            selectAll.addEventListener('change', function() {
+                document.querySelectorAll('.ail-skill-checkbox').forEach(function(cb) {
+                    cb.checked = selectAll.checked;
+                });
+            });
+        }
+
+        // ── Force Update Check ────────────────────────────────────────────────
+        document.getElementById('ail-force-update-btn').addEventListener('click', function() {
+            var btn = this,
+                spinner = document.getElementById('ail-check-spinner'),
+                result = document.getElementById('ail-update-result');
+            btn.disabled = true;
+            spinner.style.display = 'inline-flex';
+            result.innerHTML = '';
+            var fd = new FormData();
+            fd.append('action', 'ail_force_update_check');
+            fd.append('nonce', '<?php echo wp_create_nonce('ail_force_update'); ?>');
+            fetch('<?php echo admin_url('admin-ajax.php'); ?>', {
+                    method: 'POST',
+                    body: fd,
+                    credentials: 'same-origin'
+                })
+                .then(function(r) {
+                    return r.json();
+                })
+                .then(function(resp) {
+                    spinner.style.display = 'none';
+                    btn.disabled = false;
+                    if (resp.success) {
+                        var d = resp.data,
+                            color = d.has_update ? '#ef4444' : '#16a34a';
+                        var html = '<div class="ail-s-update-box" style="border-left-color:' + color + '">' +
+                            '<strong>' + d.message + '</strong><br>' +
+                            'Installed: <code>' + d.current_version + '</code> &nbsp;|&nbsp; Latest: <code>' + d.latest_version + '</code><br>' +
+                            'Released: ' + d.published_at;
+                        if (d.has_update) html += '<br><a href="<?php echo admin_url('plugins.php'); ?>" class="ail-s-btn ail-s-btn--primary" style="margin-top:10px">Go to Plugins to Update</a>';
+                        html += '</div>';
+                        result.innerHTML = html;
+                    } else {
+                        var msg = (resp.data && resp.data.message) ? resp.data.message : (resp.data || 'Unknown error');
+                        result.innerHTML = '<div class="ail-s-update-box" style="border-left-color:#ef4444">' + msg + '</div>';
+                    }
+                })
+                .catch(function(err) {
+                    spinner.style.display = 'none';
+                    btn.disabled = false;
+                    result.innerHTML = '<div class="ail-s-update-box" style="border-left-color:#ef4444">Connection error: ' + err + '</div>';
+                });
+        });
+    })();
 </script>
+
+<style>
+    /* ── Design System: Data-Dense Dashboard / Fira Sans ─────────────────── */
+    #ail-settings-app {
+        font-family: 'Fira Sans', system-ui, sans-serif;
+        color: #1e293b;
+        max-width: 900px;
+    }
+
+    #ail-settings-app *,
+    #ail-settings-app *::before,
+    #ail-settings-app *::after {
+        box-sizing: border-box;
+    }
+
+    /* Header */
+    .ail-s-header {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        margin-bottom: 24px;
+        flex-wrap: wrap;
+    }
+
+    .ail-s-header__icon {
+        background: linear-gradient(135deg, #3b82f6, #6366f1);
+        color: #fff;
+        width: 48px;
+        height: 48px;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+        box-shadow: 0 4px 14px -4px rgba(99, 102, 241, .4);
+    }
+
+    .ail-s-header__title {
+        font-size: 22px;
+        font-weight: 700;
+        color: #0f172a;
+        margin: 0 0 3px;
+    }
+
+    .ail-s-header__sub {
+        font-size: 13px;
+        color: #64748b;
+        margin: 0;
+    }
+
+    .ail-s-header__status {
+        margin-left: auto;
+        background: #f0fdf4;
+        color: #166534;
+        border: 1px solid #bbf7d0;
+        border-radius: 8px;
+        padding: 7px 14px;
+        font-size: 13px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .ail-s-dot {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background: #16a34a;
+        flex-shrink: 0;
+        box-shadow: 0 0 0 2px #bbf7d0;
+    }
+
+    /* Tabs */
+    .ail-s-tabs {
+        display: flex;
+        gap: 2px;
+        border-bottom: 2px solid #e2e8f0;
+        margin-bottom: 20px;
+    }
+
+    .ail-s-tab {
+        background: transparent;
+        border: none;
+        border-bottom: 2.5px solid transparent;
+        padding: 10px 18px;
+        font-size: 13px;
+        font-weight: 500;
+        color: #64748b;
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        gap: 7px;
+        transition: color .15s;
+        margin-bottom: -2px;
+        font-family: inherit;
+    }
+
+    .ail-s-tab:hover {
+        color: #1e293b;
+    }
+
+    .ail-s-tab--active {
+        color: #2563eb;
+        border-bottom-color: #2563eb;
+        font-weight: 600;
+    }
+
+    /* Card */
+    .ail-s-card {
+        background: #fff;
+        border: 1px solid #e2e8f0;
+        border-radius: 14px;
+        overflow: hidden;
+        margin-bottom: 16px;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, .04);
+    }
+
+    .ail-s-card__head {
+        font-size: 14px;
+        font-weight: 600;
+        color: #0f172a;
+        padding: 16px 20px;
+        border-bottom: 1px solid #f1f5f9;
+        background: #f8fafc;
+    }
+
+    /* Fields */
+    .ail-s-fields {
+        padding: 20px;
+        display: flex;
+        flex-direction: column;
+        gap: 20px;
+    }
+
+    .ail-s-fields--row {
+        flex-direction: row;
+        flex-wrap: wrap;
+        gap: 24px;
+    }
+
+    .ail-s-fields--row .ail-s-field {
+        flex: 1;
+        min-width: 180px;
+    }
+
+    .ail-s-field {
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+    }
+
+    .ail-s-field--toggle {
+        flex-direction: row;
+        justify-content: space-between;
+        align-items: center;
+        gap: 16px;
+        background: #f8fafc;
+        border: 1px solid #e2e8f0;
+        border-radius: 10px;
+        padding: 14px 16px;
+    }
+
+    .ail-s-label {
+        font-size: 13px;
+        font-weight: 600;
+        color: #374151;
+    }
+
+    .ail-s-optional {
+        font-weight: 400;
+        color: #94a3b8;
+        font-size: 12px;
+    }
+
+    .ail-s-hint {
+        font-size: 12px;
+        color: #64748b;
+        margin: 0;
+        line-height: 1.5;
+    }
+
+    .ail-s-hint a {
+        color: #2563eb;
+        text-decoration: none;
+    }
+
+    .ail-s-hint a:hover {
+        text-decoration: underline;
+    }
+
+    /* Inputs */
+    .ail-s-input {
+        width: 100%;
+        padding: 9px 12px;
+        border: 1.5px solid #e2e8f0;
+        border-radius: 8px;
+        font-size: 13px;
+        font-family: 'Fira Sans', sans-serif;
+        color: #0f172a;
+        background: #fff;
+        transition: border-color .15s, box-shadow .15s;
+    }
+
+    .ail-s-input:focus {
+        outline: none;
+        border-color: #3b82f6;
+        box-shadow: 0 0 0 3px rgba(59, 130, 246, .12);
+    }
+
+    .ail-s-input--sm {
+        max-width: 120px;
+    }
+
+    .ail-s-select {
+        width: 100%;
+        padding: 9px 12px;
+        border: 1.5px solid #e2e8f0;
+        border-radius: 8px;
+        font-size: 13px;
+        font-family: 'Fira Sans', sans-serif;
+        color: #0f172a;
+        background: #fff;
+        cursor: pointer;
+        transition: border-color .15s;
+        appearance: none;
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%2364748b' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
+        background-repeat: no-repeat;
+        background-position: right 10px center;
+        padding-right: 36px;
+    }
+
+    .ail-s-select:focus {
+        outline: none;
+        border-color: #3b82f6;
+        box-shadow: 0 0 0 3px rgba(59, 130, 246, .12);
+    }
+
+    /* Provider grid */
+    .ail-s-providers {
+        padding: 16px 20px;
+        display: flex;
+        gap: 12px;
+        flex-wrap: wrap;
+    }
+
+    .ail-s-provider {
+        flex: 1;
+        min-width: 180px;
+        border: 1.5px solid #e2e8f0;
+        border-radius: 12px;
+        padding: 14px 16px;
+        cursor: pointer;
+        transition: border-color .18s, background .18s, box-shadow .18s;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+    }
+
+    .ail-s-provider:hover {
+        border-color: #3b82f6;
+        background: #f8fafc;
+    }
+
+    .ail-s-provider--active {
+        border-color: #3b82f6;
+        background: #eff6ff;
+        box-shadow: 0 0 0 3px rgba(59, 130, 246, .12);
+    }
+
+    .ail-s-provider__icon {
+        width: 38px;
+        height: 38px;
+        border-radius: 10px;
+        background: #f1f5f9;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #475569;
+        flex-shrink: 0;
+        transition: background .18s, color .18s;
+    }
+
+    .ail-s-provider--active .ail-s-provider__icon {
+        background: #2563eb;
+        color: #fff;
+    }
+
+    .ail-s-provider__name {
+        font-size: 14px;
+        font-weight: 600;
+        color: #0f172a;
+    }
+
+    .ail-s-provider__sub {
+        font-size: 12px;
+        color: #64748b;
+        margin-top: 2px;
+    }
+
+    /* Skills box */
+    .ail-s-skills-box {
+        background: #f8fafc;
+        border: 1px solid #e2e8f0;
+        border-radius: 10px;
+        padding: 14px 16px;
+    }
+
+    .ail-s-skills-all {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-size: 13px;
+        font-weight: 600;
+        color: #0f172a;
+        cursor: pointer;
+    }
+
+    .ail-s-divider {
+        border: none;
+        border-top: 1px solid #e2e8f0;
+        margin: 12px 0;
+    }
+
+    .ail-s-skills-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 8px;
+    }
+
+    .ail-s-skill-item {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-size: 13px;
+        color: #374151;
+        cursor: pointer;
+    }
+
+    .ail-s-skill-item input {
+        accent-color: #2563eb;
+    }
+
+    /* Toggle switch */
+    .ail-toggle {
+        position: relative;
+        display: inline-block;
+        width: 44px;
+        height: 24px;
+        flex-shrink: 0;
+    }
+
+    .ail-toggle input[type="hidden"] {
+        display: none;
+    }
+
+    .ail-toggle input[type="checkbox"] {
+        opacity: 0;
+        width: 0;
+        height: 0;
+        position: absolute;
+    }
+
+    .ail-toggle__slider {
+        position: absolute;
+        cursor: pointer;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: #cbd5e1;
+        border-radius: 24px;
+        transition: background .2s;
+    }
+
+    .ail-toggle__slider::before {
+        content: '';
+        position: absolute;
+        width: 18px;
+        height: 18px;
+        left: 3px;
+        bottom: 3px;
+        background: #fff;
+        border-radius: 50%;
+        transition: transform .2s;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, .2);
+    }
+
+    .ail-toggle input:checked+.ail-toggle__slider {
+        background: #3b82f6;
+    }
+
+    .ail-toggle input:checked+.ail-toggle__slider::before {
+        transform: translateX(20px);
+    }
+
+    .ail-toggle input:focus-visible+.ail-toggle__slider {
+        box-shadow: 0 0 0 3px rgba(59, 130, 246, .25);
+    }
+
+    /* Status rows */
+    .ail-s-stat-row {
+        display: flex;
+        align-items: baseline;
+        gap: 16px;
+        padding: 10px 0;
+        border-bottom: 1px solid #f1f5f9;
+        font-size: 13px;
+        flex-wrap: wrap;
+    }
+
+    .ail-s-stat-row:last-child {
+        border-bottom: none;
+    }
+
+    .ail-s-stat-label {
+        min-width: 160px;
+        font-weight: 600;
+        color: #374151;
+        flex-shrink: 0;
+    }
+
+    .ail-s-stat-val {
+        color: #0f172a;
+        flex: 1;
+    }
+
+    .ail-s-stat-val code {
+        background: #f1f5f9;
+        padding: 2px 7px;
+        border-radius: 5px;
+        font-family: 'Fira Code', monospace;
+        font-size: 12px;
+        color: #0f172a;
+    }
+
+    /* Update result box */
+    .ail-s-update-box {
+        padding: 14px 16px;
+        background: #f8fafc;
+        border: 1px solid #e2e8f0;
+        border-left-width: 4px;
+        border-radius: 8px;
+        font-size: 13px;
+        line-height: 1.6;
+        margin-top: 12px;
+    }
+
+    /* Save bar */
+    .ail-s-save-bar {
+        padding: 16px 0 4px;
+        border-top: 1px solid #e2e8f0;
+        margin-top: 8px;
+    }
+
+    /* Buttons */
+    .ail-s-btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 7px;
+        padding: 9px 18px;
+        border-radius: 8px;
+        font-size: 13px;
+        font-weight: 600;
+        border: none;
+        cursor: pointer;
+        transition: background .18s, box-shadow .18s;
+        font-family: inherit;
+        text-decoration: none;
+    }
+
+    .ail-s-btn--primary {
+        background: #2563eb;
+        color: #fff;
+    }
+
+    .ail-s-btn--primary:hover:not(:disabled) {
+        background: #1d4ed8;
+        box-shadow: 0 3px 10px -3px rgba(37, 99, 235, .5);
+    }
+
+    .ail-s-btn--secondary {
+        background: #fff;
+        color: #475569;
+        border: 1.5px solid #e2e8f0;
+    }
+
+    .ail-s-btn--secondary:hover:not(:disabled) {
+        border-color: #3b82f6;
+        color: #2563eb;
+    }
+
+    .ail-s-btn:disabled {
+        opacity: .45;
+        cursor: not-allowed;
+    }
+
+    /* Spinner */
+    @keyframes ail-spin {
+        to {
+            transform: rotate(360deg);
+        }
+    }
+
+    .ail-spin {
+        animation: ail-spin .75s linear infinite;
+        display: inline-block;
+        vertical-align: middle;
+    }
+
+    /* Responsive */
+    @media (max-width:640px) {
+        .ail-s-providers {
+            flex-direction: column;
+        }
+
+        .ail-s-fields--row {
+            flex-direction: column;
+        }
+
+        .ail-s-header {
+            flex-direction: column;
+            align-items: flex-start;
+        }
+
+        .ail-s-header__status {
+            margin-left: 0;
+        }
+
+        .ail-s-skills-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>

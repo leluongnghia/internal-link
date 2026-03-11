@@ -106,6 +106,12 @@ class AIL_Loader
 		// Orphaned Posts AJAX
 		$this->add_action('wp_ajax_ail_force_link_index', $plugin_admin, 'ajax_force_link_index');
 		$this->add_action('wp_ajax_ail_auto_inbound', $plugin_admin, 'ajax_auto_inbound');
+
+		// Keyword Clusters AJAX
+		$this->add_action('wp_ajax_ail_import_keywords', $plugin_admin, 'ajax_import_keywords');
+		$this->add_action('wp_ajax_ail_run_clustering', $plugin_admin, 'ajax_run_clustering');
+		$this->add_action('wp_ajax_ail_delete_keywords', $plugin_admin, 'ajax_delete_keywords');
+		$this->add_action('wp_ajax_ail_get_cluster_data', $plugin_admin, 'ajax_get_cluster_data');
 	}
 
 	/**
@@ -119,6 +125,4 @@ class AIL_Loader
 		$this->add_action('save_post', $plugin_public, 'auto_inject_on_save');
 		$this->add_action('ail_async_process_start', $plugin_public, 'process_background_event');
 	}
-
-
 }
