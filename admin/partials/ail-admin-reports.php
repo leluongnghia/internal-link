@@ -52,21 +52,30 @@ $top_anchors = $wpdb->get_results("SELECT * FROM $table_anchors ORDER BY usage_c
             </div>
         </div>
 
-        <div style="margin-top: 20px;">
-            <button type="button" id="ail-force-batch-btn" class="ail-button ail-button-primary">Force Run Batch Now</button>
-            <div id="ail-batch-message" style="margin-top: 10px; font-size: 13px;"></div>
+        <div style="margin-top: 20px; display: flex; align-items: center; gap: 12px;">
+            <button type="button" id="ail-force-batch-btn" class="ail-button ail-button-primary">▶ Run All</button>
+            <button type="button" id="ail-pause-batch-btn" class="ail-button" style="display:none; background: var(--ail-bg-elevated); color: var(--ail-text-primary); border: 1px solid var(--ail-border);">⏸ Pause</button>
+            <div id="ail-batch-message" style="font-size: 13px;"></div>
         </div>
     </div>
 
     <script>
     jQuery(document).ready(function($) {
-        
+        var isPaused = false;
+        var isRunning = false;
+
         function processBatchQueue() {
-            var btn = $('#ail-force-batch-btn');
-            var msg = $('#ail-batch-message');
-            var wrapper = $('#ail-batch-progress-wrapper');
-            var bar = $('#ail-batch-progress-bar');
-            
+            if (isPaused) {
+                // Paused - save state and stop loop
+                isRunning = false;
+                var p = parseInt($('#ail-pointer-val').text()) || 0;
+                var t = parseInt($('#ail-total-val').text()) || 0;
+                $('#ail-force-batch-btn').prop('disabled', false).text('▶ Resume');
+                $('#ail-pause-batch-btn').hide();
+                $('#ail-batch-message').html('<span style="color:var(--ail-warning);">⏸ Paused at ' + p + ' / ' + t + ' posts. Click Resume to continue.</span>');
+                return;
+            }
+
             $.ajax({
                 url: ajaxurl,
                 type: 'POST',
@@ -79,47 +88,58 @@ $top_anchors = $wpdb->get_results("SELECT * FROM $table_anchors ORDER BY usage_c
                         var p = response.data.pointer;
                         var t = response.data.total;
                         var finished = response.data.finished;
-                        
+
                         var newPercent = (t > 0) ? Math.min(100, Math.round((p / t) * 100)) : 0;
-                        bar.css('width', newPercent + '%').text(newPercent + '%');
+                        $('#ail-batch-progress-bar').css('width', newPercent + '%').text(newPercent + '%');
                         $('#ail-pointer-val').text(p);
                         $('#ail-total-val').text(t);
-                        
+
                         if (finished) {
-                            wrapper.removeClass('active');
-                            btn.prop('disabled', false).text('Force Run Batch Now');
-                            msg.html('<span style="color:var(--ail-success);">Batch processing complete! Loading new stats...</span>');
+                            isRunning = false;
+                            isPaused = false;
+                            $('#ail-batch-progress-wrapper').removeClass('active');
+                            $('#ail-force-batch-btn').prop('disabled', false).text('▶ Run All');
+                            $('#ail-pause-batch-btn').hide();
+                            $('#ail-batch-message').html('<span style="color:var(--ail-success);">✅ Batch complete! Refreshing stats...</span>');
                             setTimeout(function() { location.reload(); }, 1500);
                         } else {
-                            msg.html('<span style="color:var(--ail-info);">Running batch... Processed ' + p + ' / ' + t + '</span>');
-                            // Trigger next batch chunk immediately
-                            processBatchQueue();
+                            $('#ail-batch-message').html('<span style="color:var(--ail-info);">⚙ Processing... ' + p + ' / ' + t + ' posts done.</span>');
+                            processBatchQueue(); // continue loop
                         }
                     } else {
-                        wrapper.removeClass('active');
-                        btn.prop('disabled', false).text('Force Run Batch Now');
-                        msg.html('<span style="color:var(--ail-error);">' + response.data + '</span>');
+                        isRunning = false;
+                        $('#ail-batch-progress-wrapper').removeClass('active');
+                        $('#ail-force-batch-btn').prop('disabled', false).text('▶ Run All');
+                        $('#ail-pause-batch-btn').hide();
+                        $('#ail-batch-message').html('<span style="color:var(--ail-error);">' + (response.data || 'Unknown error') + '</span>');
                     }
                 },
                 error: function() {
-                    wrapper.removeClass('active');
-                    btn.prop('disabled', false).text('Force Run Batch Now');
-                    msg.html('<span style="color:var(--ail-error);">Server error occurred. Automatically retrying in 3s...</span>');
+                    $('#ail-batch-message').html('<span style="color:var(--ail-warning);">⚠ Server timeout, retrying in 3s...</span>');
                     setTimeout(processBatchQueue, 3000);
                 }
             });
         }
-    
+
+        // Run / Resume button
         $('#ail-force-batch-btn').on('click', function() {
-            var btn = $(this);
-            var msg = $('#ail-batch-message');
-            var wrapper = $('#ail-batch-progress-wrapper');
-            
-            btn.prop('disabled', true).text('Processing...');
-            wrapper.addClass('active'); // Start animation
-            msg.html('<span style="color:var(--ail-info);">Starting continuous batch process...</span>');
-            
+            if (isRunning) return;
+            isPaused = false;
+            isRunning = true;
+
+            $(this).prop('disabled', true).text('Processing...');
+            $('#ail-pause-batch-btn').show();
+            $('#ail-batch-progress-wrapper').addClass('active');
+            $('#ail-batch-message').html('<span style="color:var(--ail-info);">Starting... (progress is saved if you pause)</span>');
+
             processBatchQueue();
+        });
+
+        // Pause button
+        $('#ail-pause-batch-btn').on('click', function() {
+            isPaused = true;
+            $(this).hide();
+            $('#ail-batch-message').html('<span style="color:var(--ail-warning);">⏸ Pausing after current batch...</span>');
         });
     });
     </script>
