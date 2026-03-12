@@ -22,6 +22,12 @@ class AIL_Keyword_Clusterer
     const SIMILARITY_THRESHOLD = 0.40;
 
     /**
+     * Vector Similarity Threshold for Semantic Embeddings (Cosine Similarity)
+     * text-embedding-004 is dense, so 0.78-0.85 is a good threshold for tight clusters.
+     */
+    const VECTOR_SIMILARITY_THRESHOLD = 0.82;
+
+    /**
      * Stop-words to ignore when comparing keyword tokens.
      */
     private static $stopwords = [
@@ -113,6 +119,14 @@ class AIL_Keyword_Clusterer
             return ['clusters' => [], 'total' => 0, 'cluster_count' => 0];
         }
 
+        $gemini_key = get_option('ail_gemini_key');
+        $embedding_model = get_option('ail_embedding_model', 'text-embedding-004');
+        $naming_model = get_option('ail_naming_model', 'gemini-2.0-flash');
+
+        if (!empty($gemini_key) && !empty($embedding_model)) {
+            $this->fetch_embeddings($keywords, $gemini_key, $embedding_model);
+        }
+
         // Reset existing cluster assignments
         $wpdb->query("UPDATE $table SET cluster_group = '', is_pillar = 0");
 
@@ -128,6 +142,10 @@ class AIL_Keyword_Clusterer
             $cluster_index = $grouped['next_index'];
         }
 
+        if (!empty($naming_model)) {
+            $all_clusters = $this->name_clusters_with_ai($all_clusters, $naming_model);
+        }
+
         // Step 2: Persist clusters back to DB
         foreach ($all_clusters as $cluster) {
             $pillar_id = null;
@@ -135,8 +153,8 @@ class AIL_Keyword_Clusterer
 
             // Elect pillar = highest volume in cluster
             foreach ($cluster['keywords'] as $kw) {
-                if ((int)$kw['volume'] > $pillar_volume) {
-                    $pillar_volume = (int)$kw['volume'];
+                if ((int) $kw['volume'] > $pillar_volume) {
+                    $pillar_volume = (int) $kw['volume'];
                     $pillar_id = $kw['id'];
                 }
             }
@@ -147,7 +165,7 @@ class AIL_Keyword_Clusterer
                     $table,
                     [
                         'cluster_group' => $cluster['name'],
-                        'is_pillar'     => $is_pillar,
+                        'is_pillar' => $is_pillar,
                     ],
                     ['id' => $kw['id']],
                     ['%s', '%d'],
@@ -157,8 +175,8 @@ class AIL_Keyword_Clusterer
         }
 
         return [
-            'clusters'      => $all_clusters,
-            'total'         => count($keywords),
+            'clusters' => $all_clusters,
+            'total' => count($keywords),
             'cluster_count' => count($all_clusters),
         ];
     }
@@ -184,16 +202,21 @@ class AIL_Keyword_Clusterer
      */
     private function normalise_intent(string $raw): string
     {
-        if (empty($raw)) return 'other';
+        if (empty($raw))
+            return 'other';
 
         // Semrush often exports as CSV list — take first token
         $parts = preg_split('/[,;\/\|]+/', $raw);
         $primary = strtolower(trim($parts[0] ?? ''));
 
-        if (strpos($primary, 'info') !== false)        return 'informational';
-        if (strpos($primary, 'nav') !== false)         return 'navigational';
-        if (strpos($primary, 'transact') !== false)    return 'transactional';
-        if (strpos($primary, 'commerc') !== false)     return 'commercial';
+        if (strpos($primary, 'info') !== false)
+            return 'informational';
+        if (strpos($primary, 'nav') !== false)
+            return 'navigational';
+        if (strpos($primary, 'transact') !== false)
+            return 'transactional';
+        if (strpos($primary, 'commerc') !== false)
+            return 'commercial';
         return 'other';
     }
 
@@ -203,37 +226,45 @@ class AIL_Keyword_Clusterer
      */
     private function cluster_bucket(array $keywords, string $intent_label, int $start_index): array
     {
-        $clusters    = [];
-        $assigned    = [];
+        $clusters = [];
+        $assigned = [];
 
         foreach ($keywords as $i => $kw_a) {
-            if (isset($assigned[$i])) continue;
+            if (isset($assigned[$i]))
+                continue;
 
             $tokens_a = $this->tokenize($kw_a['keyword']);
-            $cluster  = [$kw_a];
+            $cluster = [$kw_a];
             $assigned[$i] = true;
 
             foreach ($keywords as $j => $kw_b) {
-                if ($i === $j || isset($assigned[$j])) continue;
+                if ($i === $j || isset($assigned[$j]))
+                    continue;
 
-                $tokens_b  = $this->tokenize($kw_b['keyword']);
-                $similarity = $this->overlap_similarity($tokens_a, $tokens_b);
+                if (isset($kw_a['vector']) && isset($kw_b['vector'])) {
+                    $similarity = $this->cosine_similarity($kw_a['vector'], $kw_b['vector']);
+                    $threshold = self::VECTOR_SIMILARITY_THRESHOLD;
+                } else {
+                    $tokens_b = $this->tokenize($kw_b['keyword']);
+                    $similarity = $this->overlap_similarity($tokens_a, $tokens_b);
+                    $threshold = self::SIMILARITY_THRESHOLD;
+                }
 
-                if ($similarity >= self::SIMILARITY_THRESHOLD) {
-                    $cluster[]    = $kw_b;
+                if ($similarity >= $threshold) {
+                    $cluster[] = $kw_b;
                     $assigned[$j] = true;
                 }
             }
 
             // Generate a human-readable cluster name from the highest-volume keyword's tokens
-            usort($cluster, fn($a, $b) => (int)$b['volume'] - (int)$a['volume']);
+            usort($cluster, fn($a, $b) => (int) $b['volume'] - (int) $a['volume']);
             $cluster_name = $this->make_cluster_name($cluster[0]['keyword'], $intent_label, $start_index);
 
             $clusters[] = [
-                'name'    => $cluster_name,
-                'intent'  => $intent_label,
+                'name' => $cluster_name,
+                'intent' => $intent_label,
                 'keywords' => $cluster,
-                'volume'  => array_sum(array_column($cluster, 'volume')),
+                'volume' => array_sum(array_column($cluster, 'volume')),
             ];
             $start_index++;
         }
@@ -246,7 +277,7 @@ class AIL_Keyword_Clusterer
      */
     private function tokenize(string $keyword): array
     {
-        $kw    = strtolower(preg_replace('/[^a-z0-9\s]/i', '', $keyword));
+        $kw = strtolower(preg_replace('/[^a-z0-9\s]/i', '', $keyword));
         $words = preg_split('/\s+/', trim($kw), -1, PREG_SPLIT_NO_EMPTY);
         $words = array_filter($words, fn($w) => !in_array($w, self::$stopwords));
         return array_unique(array_values($words));
@@ -258,7 +289,8 @@ class AIL_Keyword_Clusterer
      */
     private function overlap_similarity(array $a, array $b): float
     {
-        if (empty($a) || empty($b)) return 0.0;
+        if (empty($a) || empty($b))
+            return 0.0;
         $intersection = count(array_intersect($a, $b));
         return (2.0 * $intersection) / (count($a) + count($b));
     }
@@ -277,6 +309,156 @@ class AIL_Keyword_Clusterer
             $clean = implode(' ', $words) . '...';
         }
         return $clean;
+    }
+
+    // ──────────────────────────────────────────────────────────────────────────
+    // EMBEDDINGS & AI CLUSTER NAMING
+    // ──────────────────────────────────────────────────────────────────────────
+
+    private function fetch_embeddings(array &$keywords, string $api_key, string $model)
+    {
+        $chunks = array_chunk($keywords, 50, true);
+        foreach ($chunks as $chunk) {
+            $requests = [];
+            foreach ($chunk as $idx => $kw) {
+                $requests[] = [
+                    'model' => 'models/' . $model,
+                    'content' => [
+                        'parts' => [['text' => $kw['keyword']]]
+                    ]
+                ];
+            }
+            $payload = json_encode(['requests' => $requests]);
+            $url = "https://generativelanguage.googleapis.com/v1beta/models/{$model}:batchEmbedContents?key={$api_key}";
+            $response = wp_remote_post($url, [
+                'headers' => ['Content-Type' => 'application/json'],
+                'body' => $payload,
+                'timeout' => 60
+            ]);
+
+            if (!is_wp_error($response) && wp_remote_retrieve_response_code($response) === 200) {
+                $body = json_decode(wp_remote_retrieve_body($response), true);
+                if (!empty($body['embeddings'])) {
+                    $i = 0;
+                    foreach ($chunk as $idx => $kw) {
+                        if (isset($body['embeddings'][$i]['values'])) {
+                            $keywords[$idx]['vector'] = $body['embeddings'][$i]['values'];
+                        }
+                        $i++;
+                    }
+                }
+            }
+        }
+    }
+
+    private function cosine_similarity(array $vecA, array $vecB): float
+    {
+        $dot = 0.0;
+        $normA = 0.0;
+        $normB = 0.0;
+        foreach ($vecA as $i => $valA) {
+            $valB = $vecB[$i] ?? 0.0;
+            $dot += $valA * $valB;
+            $normA += $valA * $valA;
+            $normB += $valB * $valB;
+        }
+        if ($normA == 0.0 || $normB == 0.0)
+            return 0.0;
+        return $dot / (sqrt($normA) * sqrt($normB));
+    }
+
+    private function name_clusters_with_ai(array $clusters, string $model): array
+    {
+        if (empty($clusters))
+            return $clusters;
+
+        // Group into smaller chunks to avoid exceeding context or causing AI to cut off JSON
+        $cluster_chunks = array_chunk($clusters, 25, true);
+
+        // Map old indexes so we can update the correct items in the original array
+        $real_indexes = array_keys($clusters);
+
+        $chunk_start = 0;
+        foreach ($cluster_chunks as $chunk) {
+            $prompt_data = [];
+            foreach ($chunk as $i => $c) {
+                $kws = array_slice(array_column($c['keywords'], 'keyword'), 0, 8);
+                $prompt_data[] = "Cluster {$i} Keywords: " . implode(', ', $kws);
+            }
+
+            $prompt = "You are an expert SEO taxonomist. I have formed Keyword Clusters.\n" .
+                "Your task is to provide a concise, readable 'Pillar Node Title' (2-5 words) and a canonical 'Intent' (Informational, Navigational, Commercial, or Transactional) for each cluster based solely on its keywords.\n\n" .
+                "Return ONLY a valid JSON object where keys are exactly the cluster index number and values are {\"name\": \"Topic Name\", \"intent\": \"The Intent\"}\n\n" .
+                implode("\n", $prompt_data);
+
+            $json_response = '';
+
+            if (strpos($model, 'gpt-') !== false) {
+                $api_key = get_option('ail_openai_key');
+                if ($api_key) {
+                    $response = wp_remote_post("https://api.openai.com/v1/chat/completions", [
+                        'headers' => [
+                            'Content-Type' => 'application/json',
+                            'Authorization' => "Bearer {$api_key}"
+                        ],
+                        'body' => json_encode([
+                            'model' => $model,
+                            'messages' => [['role' => 'user', 'content' => $prompt]],
+                            'response_format' => ['type' => 'json_object'],
+                            'temperature' => 0.2
+                        ]),
+                        'timeout' => 45
+                    ]);
+                    if (!is_wp_error($response) && wp_remote_retrieve_response_code($response) === 200) {
+                        $body = json_decode(wp_remote_retrieve_body($response), true);
+                        $json_response = $body['choices'][0]['message']['content'] ?? '';
+                    }
+                }
+            } else {
+                $api_key = get_option('ail_gemini_key');
+                if ($api_key) {
+                    $url = "https://generativelanguage.googleapis.com/v1beta/models/{$model}:generateContent?key={$api_key}";
+                    $payload = [
+                        'contents' => [
+                            ['role' => 'user', 'parts' => [['text' => $prompt]]]
+                        ],
+                        'generationConfig' => [
+                            'temperature' => 0.2,
+                            'responseMimeType' => 'application/json'
+                        ]
+                    ];
+                    $response = wp_remote_post($url, [
+                        'headers' => ['Content-Type' => 'application/json'],
+                        'body' => json_encode($payload),
+                        'timeout' => 45
+                    ]);
+                    if (!is_wp_error($response) && wp_remote_retrieve_response_code($response) === 200) {
+                        $body = json_decode(wp_remote_retrieve_body($response), true);
+                        $json_response = $body['candidates'][0]['content']['parts'][0]['text'] ?? '';
+                    }
+                }
+            }
+
+            if (!empty($json_response)) {
+                // Strip markdown wrappers if any
+                $json_response = preg_replace('/```json|```/', '', $json_response);
+                $decoded = json_decode(trim($json_response), true);
+                if (is_array($decoded)) {
+                    foreach ($chunk as $i => $c) {
+                        if (isset($decoded[$i]) && is_array($decoded[$i])) {
+                            if (!empty($decoded[$i]['name'])) {
+                                $clusters[$i]['name'] = sanitize_text_field($decoded[$i]['name']);
+                            }
+                            if (!empty($decoded[$i]['intent'])) {
+                                $clusters[$i]['intent'] = sanitize_text_field($decoded[$i]['intent']);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        return $clusters;
     }
 
     // ──────────────────────────────────────────────────────────────────────────
@@ -308,7 +490,7 @@ class AIL_Keyword_Clusterer
                 $clusters[$g] = ['name' => $g, 'keywords' => [], 'pillar' => null, 'volume' => 0];
             }
             $clusters[$g]['keywords'][] = $row;
-            $clusters[$g]['volume']    += (int)$row['volume'];
+            $clusters[$g]['volume'] += (int) $row['volume'];
             if ($row['is_pillar']) {
                 $clusters[$g]['pillar'] = $row;
             }
@@ -347,7 +529,7 @@ class AIL_Keyword_Clusterer
             ARRAY_A
         );
 
-        $gaps   = [];
+        $gaps = [];
         foreach ($pillars as $pillar) {
             $kw = esc_sql($pillar['keyword']);
             $match = $wpdb->get_var($wpdb->prepare(
@@ -374,7 +556,7 @@ class AIL_Keyword_Clusterer
     public static function get_cluster_post_map(): array
     {
         $clusters = self::get_saved_clusters();
-        $map      = [];
+        $map = [];
         foreach ($clusters as $name => $cluster) {
             $matched_post = null;
             if (!empty($cluster['pillar'])) {
@@ -400,7 +582,7 @@ class AIL_Keyword_Clusterer
             $spokes = array_filter($cluster['keywords'], fn($k) => !$k['is_pillar']);
             $map[$name] = [
                 'pillar' => $cluster['pillar'],
-                'post'   => $matched_post,
+                'post' => $matched_post,
                 'spokes' => array_values($spokes),
                 'volume' => $cluster['volume'],
                 'intent' => !empty($cluster['keywords']) ? $cluster['keywords'][0]['intent'] : '',

@@ -199,6 +199,11 @@ class AIL_Admin
         register_setting('ail_options_group', 'ail_max_links');
         register_setting('ail_options_group', 'ail_max_anchor_repeat');
 
+        // Clustering Settings
+        register_setting('ail_options_group', 'ail_embedding_model');
+        register_setting('ail_options_group', 'ail_naming_model');
+
+
         // Automation / Trigger Settings
         register_setting('ail_options_group', 'ail_auto_on_save');
         register_setting('ail_options_group', 'ail_background_mode');

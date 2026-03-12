@@ -198,6 +198,47 @@ $provider = get_option('ail_api_provider', 'openai');
 
         <!-- ── TAB: LINK STRATEGY ─────────────────────────────────────────── -->
         <div class="ail-s-pane" id="ail-pane-strategy" style="display:none">
+
+            <div class="ail-s-card">
+                <div class="ail-s-card__head">Silo & Clustering Models</div>
+                <div class="ail-s-fields">
+                    <div class="ail-s-field">
+                        <label class="ail-s-label" for="ail_embedding_model">Embedding Model *</label>
+                        <select name="ail_embedding_model" id="ail_embedding_model" class="ail-s-select">
+                            <?php $emb_model = get_option('ail_embedding_model', 'text-embedding-004'); ?>
+                            <option value="text-embedding-004" <?php selected($emb_model, 'text-embedding-004'); ?>>
+                                Gemini — text-embedding-004 (Stable, Free)</option>
+                            <option value="embedding-001" <?php selected($emb_model, 'embedding-001'); ?>>Gemini —
+                                embedding-001 (Legacy)</option>
+                        </select>
+                        <p class="ail-s-hint">Used to convert keywords into semantic vectors for grouping. Yêu cầu cấu
+                            hình Gemini API Key.</p>
+                    </div>
+
+                    <div class="ail-s-field">
+                        <label class="ail-s-label" for="ail_naming_model">Naming & Intent Model <svg width="14"
+                                height="14" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" stroke-width="2"
+                                stroke-linecap="round" stroke-linejoin="round"
+                                style="vertical-align: middle; margin-bottom: 2px;">
+                                <polygon
+                                    points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2">
+                                </polygon>
+                            </svg></label>
+                        <select name="ail_naming_model" id="ail_naming_model" class="ail-s-select">
+                            <?php $nam_model = get_option('ail_naming_model', 'gemini-2.0-flash'); ?>
+                            <option value="gemini-2.5-flash" <?php selected($nam_model, 'gemini-2.5-flash'); ?>>Gemini
+                                2.5 Flash</option>
+                            <option value="gemini-2.0-flash" <?php selected($nam_model, 'gemini-2.0-flash'); ?>>Gemini
+                                2.0 Flash</option>
+                            <option value="gpt-4o-mini" <?php selected($nam_model, 'gpt-4o-mini'); ?>>GPT-4o Mini
+                                (OpenAI)</option>
+                        </select>
+                        <p class="ail-s-hint">Names each cluster and classifies search intent. Sẽ dùng API của model
+                            được chọn.</p>
+                    </div>
+                </div>
+            </div>
+
             <div class="ail-s-card">
                 <div class="ail-s-card__head">Lọc nội dung & nguồn link</div>
                 <div class="ail-s-fields">
