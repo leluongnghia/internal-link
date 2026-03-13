@@ -578,7 +578,7 @@ $provider = get_option('ail_api_provider', 'openai');
     #ail-settings-app {
         font-family: 'Fira Sans', system-ui, sans-serif;
         color: #1e293b;
-        max-width: 900px;
+        max-width: 100%;
     }
 
     #ail-settings-app *,

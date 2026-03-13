@@ -610,7 +610,7 @@ $kw_rows = ($total_kw > 0) ? $wpdb->get_results("SELECT * FROM $table ORDER BY v
     #ail-kc-app {
         font-family: 'Fira Sans', system-ui, sans-serif;
         color: #1e293b;
-        max-width: 1320px;
+        max-width: 100%;
     }
 
     #ail-kc-app *,
